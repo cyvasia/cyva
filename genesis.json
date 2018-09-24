@@ -1,0 +1,194 @@
+{
+  "initial_timestamp": "2018-03-23T16:40:00",
+  "max_core_supply": "50000000000000000",
+  "initial_parameters": {
+    "current_fees": {
+      "parameters": [[
+        0,{
+          "fee": 1000000
+        }
+      ],[
+        1,{
+          "basic_fee": 1000000
+        }
+      ],[
+        2,{
+          "fee": 1000000
+        }
+      ],[
+        3,{
+          "fee": 100000000
+        }
+      ],[
+        4,{
+          "fee": 1000000
+        }
+      ],[
+        5,{
+          "fee": 1000000
+        }
+      ],[
+        6,{
+          "fee": 1000000,
+          "price_per_kbyte": 10
+        }
+      ],[
+        7,{
+          "fee": 1000000,
+          "price_per_kbyte": 10
+        }
+      ],[
+        8,{
+          "fee": 1000000
+        }
+      ],[
+        9,{
+          "fee": 1000000
+        }
+      ],[
+        10,{
+          "fee": 1000000
+        }
+      ],[
+        11,{
+          "fee": 1000000
+        }
+      ]
+      ],
+      "scale": 10000
+    },
+    "block_interval": 10,
+    "maintenance_interval": 86400,
+    "maintenance_skip_slots": 3,
+    "miner_proposal_review_period": 1209600,
+    "freeze_transfers_after_block": 1000000,
+    "maximum_transaction_size": 4096,
+    "maximum_block_size": 2048000,
+    "maximum_time_until_expiration": 86400,
+    "maximum_proposal_lifetime": 2419200,
+    "maximum_asset_feed_publishers": 10,
+    "maximum_miner_count": 11,
+    "maximum_authority_membership": 10,
+    "cashback_vesting_period_seconds": 31536000,
+    "cashback_vesting_threshold": "1000000000",
+    "max_predicate_opcode": 1,
+    "max_authority_depth": 2,
+    "extensions": []
+  },
+  "initial_accounts": [{
+      "name": "CVA7XsypoMUi82mWgiupq1JdEZaHZE1euUPy54Qci6C8jafDsyUED",
+      "owner_key": "CVA7XsypoMUi82mWgiupq1JdEZaHZE1euUPy54Qci6C8jafDsyUED",
+      "active_key": "CVA7XsypoMUi82mWgiupq1JdEZaHZE1euUPy54Qci6C8jafDsyUED"
+    },{
+      "name": "CVA6k7NrLryUW7pgpzyw43YexB12Djd5F7E5qJ7h6PhqW3GfeXp44",
+      "owner_key": "CVA6k7NrLryUW7pgpzyw43YexB12Djd5F7E5qJ7h6PhqW3GfeXp44",
+      "active_key": "CVA6k7NrLryUW7pgpzyw43YexB12Djd5F7E5qJ7h6PhqW3GfeXp44"
+    },{
+      "name": "CVA6XU8UQd2Lqc4Wv7hUxNpoqpfYb2ZyD2eXvfNaY9iAybBMgAD1U",
+      "owner_key": "CVA6XU8UQd2Lqc4Wv7hUxNpoqpfYb2ZyD2eXvfNaY9iAybBMgAD1U",
+      "active_key": "CVA6XU8UQd2Lqc4Wv7hUxNpoqpfYb2ZyD2eXvfNaY9iAybBMgAD1U"
+    },{
+      "name": "CVA6o8Bg9HZyx7q6hbz4Zjk5nhsZYhJxsVcLxewL197g3tJSCR77k",
+      "owner_key": "CVA6o8Bg9HZyx7q6hbz4Zjk5nhsZYhJxsVcLxewL197g3tJSCR77k",
+      "active_key": "CVA6o8Bg9HZyx7q6hbz4Zjk5nhsZYhJxsVcLxewL197g3tJSCR77k"
+    },{
+      "name": "CVA7tVxiUQUsUqTyiSPAdo5Vm2Y9Kuc51RwcxJaVdDpt94AaBZQ3x",
+      "owner_key": "CVA7tVxiUQUsUqTyiSPAdo5Vm2Y9Kuc51RwcxJaVdDpt94AaBZQ3x",
+      "active_key": "CVA7tVxiUQUsUqTyiSPAdo5Vm2Y9Kuc51RwcxJaVdDpt94AaBZQ3x"
+    },{
+      "name": "CVA5wBkAp4Xp11RWoJghfQegY84A1FB7DdgFShwi88EPUrd8U1d5S",
+      "owner_key": "CVA5wBkAp4Xp11RWoJghfQegY84A1FB7DdgFShwi88EPUrd8U1d5S",
+      "active_key": "CVA5wBkAp4Xp11RWoJghfQegY84A1FB7DdgFShwi88EPUrd8U1d5S"
+    },{
+      "name": "CVA83QGnbrGvtJa8zm936Eyh58ogC6Vz6CXFDLLgqbMFapCzTcV4o",
+      "owner_key": "CVA83QGnbrGvtJa8zm936Eyh58ogC6Vz6CXFDLLgqbMFapCzTcV4o",
+      "active_key": "CVA83QGnbrGvtJa8zm936Eyh58ogC6Vz6CXFDLLgqbMFapCzTcV4o"
+    },{
+      "name": "CVA8F5tvKn8uN8wuQJedg8y6KGuwy38pvyeP69x17A1xbAiFbTJYz",
+      "owner_key": "CVA8F5tvKn8uN8wuQJedg8y6KGuwy38pvyeP69x17A1xbAiFbTJYz",
+      "active_key": "CVA8F5tvKn8uN8wuQJedg8y6KGuwy38pvyeP69x17A1xbAiFbTJYz"
+    },{
+      "name": "CVA5YE4tHiPf31opMf7UMbvi1cWuh4PFYVzKBgmUiapM8qD5EytKN",
+      "owner_key": "CVA5YE4tHiPf31opMf7UMbvi1cWuh4PFYVzKBgmUiapM8qD5EytKN",
+      "active_key": "CVA5YE4tHiPf31opMf7UMbvi1cWuh4PFYVzKBgmUiapM8qD5EytKN"
+    },{
+      "name": "CVA8HmSg3PhBxm5kRnJjp1FdWG66SDfMj3JfQMebDLaDDsg4FPGSN",
+      "owner_key": "CVA8HmSg3PhBxm5kRnJjp1FdWG66SDfMj3JfQMebDLaDDsg4FPGSN",
+      "active_key": "CVA8HmSg3PhBxm5kRnJjp1FdWG66SDfMj3JfQMebDLaDDsg4FPGSN"
+    },{
+      "name": "CVA6qA9QuFyp5BFcQD13fqv5V8eVfQL5z1rRoGDiddqFpTaNVbycG",
+      "owner_key": "CVA6qA9QuFyp5BFcQD13fqv5V8eVfQL5z1rRoGDiddqFpTaNVbycG",
+      "active_key": "CVA6qA9QuFyp5BFcQD13fqv5V8eVfQL5z1rRoGDiddqFpTaNVbycG"
+    },{
+      "name": "CVA7cGUNdApH4e958Nbj9WfEwmcjLUsFk88tz6TJNGtNuJ6WXRiKz",
+      "owner_key": "CVA7cGUNdApH4e958Nbj9WfEwmcjLUsFk88tz6TJNGtNuJ6WXRiKz",
+      "active_key": "CVA7cGUNdApH4e958Nbj9WfEwmcjLUsFk88tz6TJNGtNuJ6WXRiKz"
+    },{
+      "name": "CVA7VVS2JvqardqQ3hvGV8ANfHEQNn2SxC3RHKoHkGmzx8moRjFHy",
+      "owner_key": "CVA7VVS2JvqardqQ3hvGV8ANfHEQNn2SxC3RHKoHkGmzx8moRjFHy",
+      "active_key": "CVA7VVS2JvqardqQ3hvGV8ANfHEQNn2SxC3RHKoHkGmzx8moRjFHy"
+    },{
+      "name": "CVA7rnCF7htZsQmChm8dMm8eL7hoJMoTEnJqQheEbHKWBBKeZAibM",
+      "owner_key": "CVA7rnCF7htZsQmChm8dMm8eL7hoJMoTEnJqQheEbHKWBBKeZAibM",
+      "active_key": "CVA7rnCF7htZsQmChm8dMm8eL7hoJMoTEnJqQheEbHKWBBKeZAibM"
+    }
+  ],
+  "initial_assets": [
+  ],
+  "initial_active_miners": 11,
+  "initial_miner_candidates": [{
+      "owner_name": "CVA7XsypoMUi82mWgiupq1JdEZaHZE1euUPy54Qci6C8jafDsyUED",
+      "block_signing_key": "CVA8XDZkvMCE74En5iJpJYXCAAK1Wj375KQkb1iJ5GFqWAX3ctggn"
+    },{
+      "owner_name": "CVA6k7NrLryUW7pgpzyw43YexB12Djd5F7E5qJ7h6PhqW3GfeXp44",
+      "block_signing_key": "CVA8XDZkvMCE74En5iJpJYXCAAK1Wj375KQkb1iJ5GFqWAX3ctggn"
+    },{
+      "owner_name": "CVA6XU8UQd2Lqc4Wv7hUxNpoqpfYb2ZyD2eXvfNaY9iAybBMgAD1U",
+      "block_signing_key": "CVA8XDZkvMCE74En5iJpJYXCAAK1Wj375KQkb1iJ5GFqWAX3ctggn"
+    },{
+      "owner_name": "CVA6o8Bg9HZyx7q6hbz4Zjk5nhsZYhJxsVcLxewL197g3tJSCR77k",
+      "block_signing_key": "CVA8XDZkvMCE74En5iJpJYXCAAK1Wj375KQkb1iJ5GFqWAX3ctggn"
+    },{
+      "owner_name": "CVA7tVxiUQUsUqTyiSPAdo5Vm2Y9Kuc51RwcxJaVdDpt94AaBZQ3x",
+      "block_signing_key": "CVA8XDZkvMCE74En5iJpJYXCAAK1Wj375KQkb1iJ5GFqWAX3ctggn"
+    },{
+      "owner_name": "CVA5wBkAp4Xp11RWoJghfQegY84A1FB7DdgFShwi88EPUrd8U1d5S",
+      "block_signing_key": "CVA8XDZkvMCE74En5iJpJYXCAAK1Wj375KQkb1iJ5GFqWAX3ctggn"
+    },{
+      "owner_name": "CVA83QGnbrGvtJa8zm936Eyh58ogC6Vz6CXFDLLgqbMFapCzTcV4o",
+      "block_signing_key": "CVA8XDZkvMCE74En5iJpJYXCAAK1Wj375KQkb1iJ5GFqWAX3ctggn"
+    },{
+      "owner_name": "CVA8F5tvKn8uN8wuQJedg8y6KGuwy38pvyeP69x17A1xbAiFbTJYz",
+      "block_signing_key": "CVA8XDZkvMCE74En5iJpJYXCAAK1Wj375KQkb1iJ5GFqWAX3ctggn"
+    },{
+      "owner_name": "CVA5YE4tHiPf31opMf7UMbvi1cWuh4PFYVzKBgmUiapM8qD5EytKN",
+      "block_signing_key": "CVA8XDZkvMCE74En5iJpJYXCAAK1Wj375KQkb1iJ5GFqWAX3ctggn"
+    },{
+      "owner_name": "CVA8HmSg3PhBxm5kRnJjp1FdWG66SDfMj3JfQMebDLaDDsg4FPGSN",
+      "block_signing_key": "CVA8XDZkvMCE74En5iJpJYXCAAK1Wj375KQkb1iJ5GFqWAX3ctggn"
+    },{
+      "owner_name": "CVA6qA9QuFyp5BFcQD13fqv5V8eVfQL5z1rRoGDiddqFpTaNVbycG",
+      "block_signing_key": "CVA8XDZkvMCE74En5iJpJYXCAAK1Wj375KQkb1iJ5GFqWAX3ctggn"
+    }
+  ],
+  "initial_chain_id": "9a5e5be357cdfa2c48dbe260f983a0109b52b9afdada705521cddad9243522f7",
+  "initial_balances": [{
+      "owner": "CVA7cGUNdApH4e958Nbj9WfEwmcjLUsFk88tz6TJNGtNuJ6WXRiKz",
+      "asset_symbol": "CVA",
+      "amount": "15000000000000000"
+    },{
+      "owner": "CVA7VVS2JvqardqQ3hvGV8ANfHEQNn2SxC3RHKoHkGmzx8moRjFHy",
+      "asset_symbol": "CVA",
+      "amount": "6000000000000000"
+    },{
+      "owner": "CVA7rnCF7htZsQmChm8dMm8eL7hoJMoTEnJqQheEbHKWBBKeZAibM",
+      "asset_symbol": "CVA",
+      "amount": "4000000000000000"
+    }
+  ],
+  "immutable_parameters": {
+    "min_miner_count": 11,
+    "num_special_accounts": 0,
+    "num_special_assets": 0
+  }
+}

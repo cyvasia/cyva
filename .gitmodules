@@ -1,0 +1,10 @@
+[submodule "libraries/contrib/json"]
+	path = libraries/contrib/json
+	url = https://github.com/PUBLIQNetwork/json.git
+[submodule "libraries/contrib/pbc"]
+	path = libraries/contrib/pbc
+	url = https://github.com/PUBLIQNetwork/pbc.git
+[submodule "libraries/contrib/fc"]
+	path = libraries/contrib/fc
+	url = https://github.com/PubliqNetwork/fc.git
+	branch = develop
