@@ -44,6 +44,7 @@
 #include <graphene/chain/transfer_evaluator.hpp>
 #include <graphene/chain/vesting_balance_evaluator.hpp>
 #include <graphene/chain/miner_evaluator.hpp>
+#include <graphene/chain/rfu_evaluator.hpp>
 
 #include <graphene/chain/protocol/fee_schedule.hpp>
 
@@ -107,6 +108,70 @@ void database::initialize_evaluators()
    register_evaluator<miner_create_evaluator>();
    register_evaluator<miner_update_evaluator>();
    register_evaluator<miner_update_global_parameters_evaluator>();
+   register_evaluator<rfu_evaluator_1>();
+   register_evaluator<rfu_evaluator_2>();
+   register_evaluator<rfu_evaluator_3>();
+   register_evaluator<rfu_evaluator_4>();
+   register_evaluator<rfu_evaluator_5>();
+   register_evaluator<rfu_evaluator_6>();
+   register_evaluator<rfu_evaluator_7>();
+   register_evaluator<rfu_evaluator_8>();
+   register_evaluator<rfu_evaluator_9>();
+   register_evaluator<rfu_evaluator_10>();
+   register_evaluator<rfu_evaluator_11>();
+   register_evaluator<rfu_evaluator_12>();
+   register_evaluator<rfu_evaluator_13>();
+   register_evaluator<rfu_evaluator_14>();
+   register_evaluator<rfu_evaluator_15>();
+   register_evaluator<rfu_evaluator_16>();
+   register_evaluator<rfu_evaluator_17>();
+   register_evaluator<rfu_evaluator_18>();
+   register_evaluator<rfu_evaluator_19>();
+   register_evaluator<rfu_evaluator_20>();
+   register_evaluator<rfu_evaluator_21>();
+   register_evaluator<rfu_evaluator_22>();
+   register_evaluator<rfu_evaluator_23>();
+   register_evaluator<rfu_evaluator_24>();
+   register_evaluator<rfu_evaluator_25>();
+   register_evaluator<rfu_evaluator_26>();
+   register_evaluator<rfu_evaluator_27>();
+   register_evaluator<rfu_evaluator_28>();
+   register_evaluator<rfu_evaluator_29>();
+   register_evaluator<rfu_evaluator_30>();
+   register_evaluator<rfu_evaluator_31>();
+   register_evaluator<rfu_evaluator_32>();
+   register_evaluator<rfu_evaluator_33>();
+   register_evaluator<rfu_evaluator_34>();
+   register_evaluator<rfu_evaluator_35>();
+   register_evaluator<rfu_evaluator_36>();
+   register_evaluator<rfu_evaluator_37>();
+   register_evaluator<rfu_evaluator_38>();
+   register_evaluator<rfu_evaluator_39>();
+   register_evaluator<rfu_evaluator_40>();
+   register_evaluator<rfu_evaluator_41>();
+   register_evaluator<rfu_evaluator_42>();
+   register_evaluator<rfu_evaluator_43>();
+   register_evaluator<rfu_evaluator_44>();
+   register_evaluator<rfu_evaluator_45>();
+   register_evaluator<rfu_evaluator_46>();
+   register_evaluator<rfu_evaluator_47>();
+   register_evaluator<rfu_evaluator_48>();
+   register_evaluator<rfu_evaluator_49>();
+   register_evaluator<rfu_evaluator_50>();
+   register_evaluator<rfu_evaluator_51>();
+   register_evaluator<rfu_evaluator_52>();
+   register_evaluator<rfu_evaluator_53>();
+   register_evaluator<rfu_evaluator_54>();
+   register_evaluator<rfu_evaluator_55>();
+   register_evaluator<rfu_evaluator_56>();
+   register_evaluator<rfu_evaluator_57>();
+   register_evaluator<rfu_evaluator_58>();
+   register_evaluator<rfu_evaluator_59>();
+   register_evaluator<rfu_evaluator_60>();
+   register_evaluator<rfu_evaluator_61>();
+   register_evaluator<rfu_evaluator_62>();
+   register_evaluator<rfu_evaluator_63>();
+   register_evaluator<rfu_evaluator_64>();
 }
 
 void database::initialize_indexes()

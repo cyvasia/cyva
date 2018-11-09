@@ -43,9 +43,7 @@ struct get_impacted_account_visitor
       add_authority_accounts( _impacted, authority(1, op.to, 1) );
    }
 
-   void operator()( const set_transfer_freeze_block_operation& op )
-   {
-   }
+   void operator()( const set_transfer_freeze_block_operation& ) { }
 
    void operator()( const account_create_operation& op )
    {
@@ -68,7 +66,7 @@ struct get_impacted_account_visitor
    {
       _impacted.insert( op.miner_account );
    }
-   void operator()( const miner_update_global_parameters_operation& op ){}
+   void operator()( const miner_update_global_parameters_operation& ){}
 
    void operator()( const proposal_create_operation& op )
    {
@@ -79,15 +77,80 @@ struct get_impacted_account_visitor
          add_authority_accounts( _impacted, o );
    }
 
-   void operator()( const proposal_update_operation& op ) {}
-   void operator()( const proposal_delete_operation& op ) {}
+   void operator()( const proposal_update_operation& ) {}
+   void operator()( const proposal_delete_operation& ) {}
 
    void operator()( const vesting_balance_create_operation& op )
    {
       _impacted.insert( op.owner );
    }
 
-   void operator()( const vesting_balance_withdraw_operation& op ) {}
+   void operator()( const vesting_balance_withdraw_operation& ) {}
+
+   void operator()( const rfu_operation_1& ) {}
+   void operator()( const rfu_operation_2& ) {}
+   void operator()( const rfu_operation_3& ) {}
+   void operator()( const rfu_operation_4& ) {}
+   void operator()( const rfu_operation_5& ) {}
+   void operator()( const rfu_operation_6& ) {}
+   void operator()( const rfu_operation_7& ) {}
+   void operator()( const rfu_operation_8& ) {}
+   void operator()( const rfu_operation_9& ) {}
+   void operator()( const rfu_operation_10& ) {}
+   void operator()( const rfu_operation_11& ) {}
+   void operator()( const rfu_operation_12& ) {}
+   void operator()( const rfu_operation_13& ) {}
+   void operator()( const rfu_operation_14& ) {}
+   void operator()( const rfu_operation_15& ) {}
+   void operator()( const rfu_operation_16& ) {}
+   void operator()( const rfu_operation_17& ) {}
+   void operator()( const rfu_operation_18& ) {}
+   void operator()( const rfu_operation_19& ) {}
+   void operator()( const rfu_operation_20& ) {}
+   void operator()( const rfu_operation_21& ) {}
+   void operator()( const rfu_operation_22& ) {}
+   void operator()( const rfu_operation_23& ) {}
+   void operator()( const rfu_operation_24& ) {}
+   void operator()( const rfu_operation_25& ) {}
+   void operator()( const rfu_operation_26& ) {}
+   void operator()( const rfu_operation_27& ) {}
+   void operator()( const rfu_operation_28& ) {}
+   void operator()( const rfu_operation_29& ) {}
+   void operator()( const rfu_operation_30& ) {}
+   void operator()( const rfu_operation_31& ) {}
+   void operator()( const rfu_operation_32& ) {}
+   void operator()( const rfu_operation_33& ) {}
+   void operator()( const rfu_operation_34& ) {}
+   void operator()( const rfu_operation_35& ) {}
+   void operator()( const rfu_operation_36& ) {}
+   void operator()( const rfu_operation_37& ) {}
+   void operator()( const rfu_operation_38& ) {}
+   void operator()( const rfu_operation_39& ) {}
+   void operator()( const rfu_operation_40& ) {}
+   void operator()( const rfu_operation_41& ) {}
+   void operator()( const rfu_operation_42& ) {}
+   void operator()( const rfu_operation_43& ) {}
+   void operator()( const rfu_operation_44& ) {}
+   void operator()( const rfu_operation_45& ) {}
+   void operator()( const rfu_operation_46& ) {}
+   void operator()( const rfu_operation_47& ) {}
+   void operator()( const rfu_operation_48& ) {}
+   void operator()( const rfu_operation_49& ) {}
+   void operator()( const rfu_operation_50& ) {}
+   void operator()( const rfu_operation_51& ) {}
+   void operator()( const rfu_operation_52& ) {}
+   void operator()( const rfu_operation_53& ) {}
+   void operator()( const rfu_operation_54& ) {}
+   void operator()( const rfu_operation_55& ) {}
+   void operator()( const rfu_operation_56& ) {}
+   void operator()( const rfu_operation_57& ) {}
+   void operator()( const rfu_operation_58& ) {}
+   void operator()( const rfu_operation_59& ) {}
+   void operator()( const rfu_operation_60& ) {}
+   void operator()( const rfu_operation_61& ) {}
+   void operator()( const rfu_operation_62& ) {}
+   void operator()( const rfu_operation_63& ) {}
+   void operator()( const rfu_operation_64& ) {}
 };
 
 void operation_get_impacted_accounts( const operation& op, flat_set<account_id_type>& result )

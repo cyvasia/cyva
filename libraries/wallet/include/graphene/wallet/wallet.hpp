@@ -859,7 +859,7 @@ namespace graphene { namespace wallet {
           *             increase with transaction size
           *  @ingroup WalletCLI
           */
-         pair<transaction_id_type,signed_transaction> transfer2(string from,
+         std::pair<transaction_id_type,signed_transaction> transfer2(string from,
                                                                 string to,
                                                                 string amount,
                                                                 string asset_symbol,

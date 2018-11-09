@@ -80,9 +80,10 @@ namespace detail {
 
    genesis_state_type create_example_genesis() {
       //TODO_CYVA - replace with super trooper private key
-      //auto cyva_key = fc::ecc::private_key::regenerate(fc::sha256::hash(string("cyva")));
+      auto cyva_key = fc::ecc::private_key::regenerate(fc::sha256::hash(string("cyva")));
       //dlog("Allocating all stake to ${key}", ("key", utilities::key_to_wif(cyva_key)));
-      public_key_type cyva_pub_key (std::string("CVA82MTCQVa9TDFmz3ZwaLzsFAmCLoJzrtFugpF72vsbuE1CpCwKy"));
+
+      public_key_type cyva_pub_key = cyva_key.get_public_key();
 
       genesis_state_type initial_state;
       initial_state.initial_parameters.current_fees = fee_schedule::get_default();//->set_all_fees(GRAPHENE_BLOCKCHAIN_PRECISION);
