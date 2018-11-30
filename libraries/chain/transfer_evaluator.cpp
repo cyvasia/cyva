@@ -57,7 +57,7 @@ void_result set_transfer_freeze_block_evaluator::do_evaluate( const set_transfer
 
    for (public_key_type const& item : keys)
    {
-       if (std::string(item) == "CVA7VVS2JvqardqQ3hvGV8ANfHEQNn2SxC3RHKoHkGmzx8moRjFHy")
+       if (std::string(item) == "CVA8f4eMzscbG1pSTBjxy1n5YdYtfo6tN5KxXGWrDzBctCti155C6")
           is_authority = true;
    }
 

@@ -61,7 +61,7 @@
     "maintenance_interval": 86400,
     "maintenance_skip_slots": 3,
     "miner_proposal_review_period": 1209600,
-    "freeze_transfers_after_block": 1000000,
+    "freeze_transfers_after_block": 100000000,
     "maximum_transaction_size": 4096,
     "maximum_block_size": 8388608,
     "maximum_time_until_expiration": 86400,
@@ -76,122 +76,130 @@
     "extensions": []
   },
   "initial_accounts": [{
-      "name": "CVA8gqcFcJ885npDk1DsD2GW51EdWr5GG6z32xmSs3Usgpcqukqzp",
-      "owner_key": "CVA8gqcFcJ885npDk1DsD2GW51EdWr5GG6z32xmSs3Usgpcqukqzp",
-      "active_key": "CVA8gqcFcJ885npDk1DsD2GW51EdWr5GG6z32xmSs3Usgpcqukqzp"
+      "name": "CVA5jNq3xvd9g18WcXnGQoLiCnaTFWUNAwuPdt2fn5yivZGNomGNF",
+      "owner_key": "CVA5jNq3xvd9g18WcXnGQoLiCnaTFWUNAwuPdt2fn5yivZGNomGNF",
+      "active_key": "CVA5jNq3xvd9g18WcXnGQoLiCnaTFWUNAwuPdt2fn5yivZGNomGNF"
     },{
-      "name": "CVA6Z4cwAbUmzWkgbexJyWDac71T7QwYXcexjnT5dswJTGAAMiAvH",
-      "owner_key": "CVA6Z4cwAbUmzWkgbexJyWDac71T7QwYXcexjnT5dswJTGAAMiAvH",
-      "active_key": "CVA6Z4cwAbUmzWkgbexJyWDac71T7QwYXcexjnT5dswJTGAAMiAvH"
+      "name": "CVA6dxZCkFqMtGKMobDH2Uhmis3wZNKHcHDLQphLrLedEPU8QZMzM",
+      "owner_key": "CVA6dxZCkFqMtGKMobDH2Uhmis3wZNKHcHDLQphLrLedEPU8QZMzM",
+      "active_key": "CVA6dxZCkFqMtGKMobDH2Uhmis3wZNKHcHDLQphLrLedEPU8QZMzM"
     },{
-      "name": "CVA7BvWbrutnjpo3WjArx1F3pTymMcTBZMRrqCzF3AK1yCzSFsRGC",
-      "owner_key": "CVA7BvWbrutnjpo3WjArx1F3pTymMcTBZMRrqCzF3AK1yCzSFsRGC",
-      "active_key": "CVA7BvWbrutnjpo3WjArx1F3pTymMcTBZMRrqCzF3AK1yCzSFsRGC"
+      "name": "CVA76WgTTLUJwF9uYuk2ENzZ2pkUzjdHY6CAnehVmogpdR4NRSXbj",
+      "owner_key": "CVA76WgTTLUJwF9uYuk2ENzZ2pkUzjdHY6CAnehVmogpdR4NRSXbj",
+      "active_key": "CVA76WgTTLUJwF9uYuk2ENzZ2pkUzjdHY6CAnehVmogpdR4NRSXbj"
     },{
-      "name": "CVA73x429wub7dtrJRbatoz9rE6tAWx1pN8i5yuvbUVChY8ksQrbQ",
-      "owner_key": "CVA73x429wub7dtrJRbatoz9rE6tAWx1pN8i5yuvbUVChY8ksQrbQ",
-      "active_key": "CVA73x429wub7dtrJRbatoz9rE6tAWx1pN8i5yuvbUVChY8ksQrbQ"
+      "name": "CVA6o4Bgp2X88aMeGHEbsvco4jDJBJHeQn9kKJMeLPL15nDL88NrS",
+      "owner_key": "CVA6o4Bgp2X88aMeGHEbsvco4jDJBJHeQn9kKJMeLPL15nDL88NrS",
+      "active_key": "CVA6o4Bgp2X88aMeGHEbsvco4jDJBJHeQn9kKJMeLPL15nDL88NrS"
     },{
-      "name": "CVA7FDmURE9cWJ2C674NMPfHp2Uh93N1bFReTnXvZynupoAJNNktz",
-      "owner_key": "CVA7FDmURE9cWJ2C674NMPfHp2Uh93N1bFReTnXvZynupoAJNNktz",
-      "active_key": "CVA7FDmURE9cWJ2C674NMPfHp2Uh93N1bFReTnXvZynupoAJNNktz"
+      "name": "CVA7DDucAydWLuUQCXJxf5BfNg6kEn1a7s8UosnVrRGLfnuZQs9c7",
+      "owner_key": "CVA7DDucAydWLuUQCXJxf5BfNg6kEn1a7s8UosnVrRGLfnuZQs9c7",
+      "active_key": "CVA7DDucAydWLuUQCXJxf5BfNg6kEn1a7s8UosnVrRGLfnuZQs9c7"
     },{
-      "name": "CVA5zJUpkQNKg2oDmuJ8yZhtVD9jupezL3w84SZDpuuPcSxwprhSx",
-      "owner_key": "CVA5zJUpkQNKg2oDmuJ8yZhtVD9jupezL3w84SZDpuuPcSxwprhSx",
-      "active_key": "CVA5zJUpkQNKg2oDmuJ8yZhtVD9jupezL3w84SZDpuuPcSxwprhSx"
+      "name": "CVA55WFR6xNgoBiJ9qYk8KW9cSWzBh7JyJ2SKPMBrbiEtVhrsJ4z4",
+      "owner_key": "CVA55WFR6xNgoBiJ9qYk8KW9cSWzBh7JyJ2SKPMBrbiEtVhrsJ4z4",
+      "active_key": "CVA55WFR6xNgoBiJ9qYk8KW9cSWzBh7JyJ2SKPMBrbiEtVhrsJ4z4"
     },{
-      "name": "CVA6DWJucmvAR3BBfo713PA4roMkzAvrmnWENgk8g4AeBkHj7yhmQ",
-      "owner_key": "CVA6DWJucmvAR3BBfo713PA4roMkzAvrmnWENgk8g4AeBkHj7yhmQ",
-      "active_key": "CVA6DWJucmvAR3BBfo713PA4roMkzAvrmnWENgk8g4AeBkHj7yhmQ"
+      "name": "CVA6tinXUqzdCTQntzBYdHgPGBoxK5159b7jN1GbcrTfzyf9wVe8D",
+      "owner_key": "CVA6tinXUqzdCTQntzBYdHgPGBoxK5159b7jN1GbcrTfzyf9wVe8D",
+      "active_key": "CVA6tinXUqzdCTQntzBYdHgPGBoxK5159b7jN1GbcrTfzyf9wVe8D"
     },{
-      "name": "CVA84K4aaoBL1WdZLQy1TjhQezoJcwbH3GF2PEav6bq8vNxaxCtpz",
-      "owner_key": "CVA84K4aaoBL1WdZLQy1TjhQezoJcwbH3GF2PEav6bq8vNxaxCtpz",
-      "active_key": "CVA84K4aaoBL1WdZLQy1TjhQezoJcwbH3GF2PEav6bq8vNxaxCtpz"
+      "name": "CVA7CQbtHU5ufEtRjHBJTbRWS7hbYQ2B5y4YvRndcjAq1TqpbzFdg",
+      "owner_key": "CVA7CQbtHU5ufEtRjHBJTbRWS7hbYQ2B5y4YvRndcjAq1TqpbzFdg",
+      "active_key": "CVA7CQbtHU5ufEtRjHBJTbRWS7hbYQ2B5y4YvRndcjAq1TqpbzFdg"
     },{
-      "name": "CVA5owDsDBa7HctDg6NVgjidEQSHVcn4UbP9FLprnR2y3wvSk3Q17",
-      "owner_key": "CVA5owDsDBa7HctDg6NVgjidEQSHVcn4UbP9FLprnR2y3wvSk3Q17",
-      "active_key": "CVA5owDsDBa7HctDg6NVgjidEQSHVcn4UbP9FLprnR2y3wvSk3Q17"
+      "name": "CVA8kX1UDGWHWLNSV7DYUwi5vFUEizCiHJmKB2y8e8Yhp2cSozjm2",
+      "owner_key": "CVA8kX1UDGWHWLNSV7DYUwi5vFUEizCiHJmKB2y8e8Yhp2cSozjm2",
+      "active_key": "CVA8kX1UDGWHWLNSV7DYUwi5vFUEizCiHJmKB2y8e8Yhp2cSozjm2"
     },{
-      "name": "CVA8VFFSRcasr5p6HnHx1zfJ3QoifSWzseH22oXegZBqciFSGBt9N",
-      "owner_key": "CVA8VFFSRcasr5p6HnHx1zfJ3QoifSWzseH22oXegZBqciFSGBt9N",
-      "active_key": "CVA8VFFSRcasr5p6HnHx1zfJ3QoifSWzseH22oXegZBqciFSGBt9N"
+      "name": "CVA8Uwk9VKYQkuzwRK3nhtYmGjRPzBsxwc6aCkkKQpXoMhMnYKjDc",
+      "owner_key": "CVA8Uwk9VKYQkuzwRK3nhtYmGjRPzBsxwc6aCkkKQpXoMhMnYKjDc",
+      "active_key": "CVA8Uwk9VKYQkuzwRK3nhtYmGjRPzBsxwc6aCkkKQpXoMhMnYKjDc"
     },{
-      "name": "CVA7ZvcybkzCBmnDrg4tXd8hmx1TVeZrnCBonrCWuYgeCGVic23vA",
-      "owner_key": "CVA7ZvcybkzCBmnDrg4tXd8hmx1TVeZrnCBonrCWuYgeCGVic23vA",
-      "active_key": "CVA7ZvcybkzCBmnDrg4tXd8hmx1TVeZrnCBonrCWuYgeCGVic23vA"
+      "name": "CVA7miDAXtUSMEJpZLgEjYQyVRDe27hCqYUDFTWFVbgDRAwesPTyu",
+      "owner_key": "CVA7miDAXtUSMEJpZLgEjYQyVRDe27hCqYUDFTWFVbgDRAwesPTyu",
+      "active_key": "CVA7miDAXtUSMEJpZLgEjYQyVRDe27hCqYUDFTWFVbgDRAwesPTyu"
     },{
-      "name": "CVA5hu76UMgs9RbLmuroFgvtLw8P3onig72WcEUFh2Q2CbAFxdcKw",
-      "owner_key": "CVA5hu76UMgs9RbLmuroFgvtLw8P3onig72WcEUFh2Q2CbAFxdcKw",
-      "active_key": "CVA5hu76UMgs9RbLmuroFgvtLw8P3onig72WcEUFh2Q2CbAFxdcKw"
+      "name": "CVA8f4eMzscbG1pSTBjxy1n5YdYtfo6tN5KxXGWrDzBctCti155C6",
+      "owner_key": "CVA8f4eMzscbG1pSTBjxy1n5YdYtfo6tN5KxXGWrDzBctCti155C6",
+      "active_key": "CVA8f4eMzscbG1pSTBjxy1n5YdYtfo6tN5KxXGWrDzBctCti155C6"
     },{
-      "name": "CVA5rGHsHxXFy8vT39cb2ftoZCZhDENoC3TurBujzrVe2prSAR7uJ",
-      "owner_key": "CVA5rGHsHxXFy8vT39cb2ftoZCZhDENoC3TurBujzrVe2prSAR7uJ",
-      "active_key": "CVA5rGHsHxXFy8vT39cb2ftoZCZhDENoC3TurBujzrVe2prSAR7uJ"
+      "name": "CVA5Ci5J2h4LK4LfnyiNPvMBqHYcwUKUSGCeYiXqfivVrdue1a6yq",
+      "owner_key": "CVA5Ci5J2h4LK4LfnyiNPvMBqHYcwUKUSGCeYiXqfivVrdue1a6yq",
+      "active_key": "CVA5Ci5J2h4LK4LfnyiNPvMBqHYcwUKUSGCeYiXqfivVrdue1a6yq"
     },{
-      "name": "CVA6YGwP2ya5YBbGfwDaHwjzZpt5VaiKEivS6g8uZD6us5UDPCHe5",
-      "owner_key": "CVA6YGwP2ya5YBbGfwDaHwjzZpt5VaiKEivS6g8uZD6us5UDPCHe5",
-      "active_key": "CVA6YGwP2ya5YBbGfwDaHwjzZpt5VaiKEivS6g8uZD6us5UDPCHe5"
+      "name": "CVA5T7xzfBKgBarDF3msyQYYZzCNgDmhf4QtkZ1vHSbL7XuFFb6Hn",
+      "owner_key": "CVA5T7xzfBKgBarDF3msyQYYZzCNgDmhf4QtkZ1vHSbL7XuFFb6Hn",
+      "active_key": "CVA5T7xzfBKgBarDF3msyQYYZzCNgDmhf4QtkZ1vHSbL7XuFFb6Hn"
     },{
-      "name": "CVA5KtqUqV1HUv3D6Dy8B3wUc5y2D9VKk7U75vB2twLWijYZUakzf",
-      "owner_key": "CVA5KtqUqV1HUv3D6Dy8B3wUc5y2D9VKk7U75vB2twLWijYZUakzf",
-      "active_key": "CVA5KtqUqV1HUv3D6Dy8B3wUc5y2D9VKk7U75vB2twLWijYZUakzf"
+      "name": "CVA7oQ8TKw3NqopYVfUEeQ8mZgNYhfpYNGTNcpz7aQ5ixEttTtyuN",
+      "owner_key": "CVA7oQ8TKw3NqopYVfUEeQ8mZgNYhfpYNGTNcpz7aQ5ixEttTtyuN",
+      "active_key": "CVA7oQ8TKw3NqopYVfUEeQ8mZgNYhfpYNGTNcpz7aQ5ixEttTtyuN"
+    },{
+       "name": "CVA6hPtKDvYHNSXD6oR3fTHoB7oHQiEh4u19kWQF7v3PqbfDdkHck",
+       "owner_key": "CVA6hPtKDvYHNSXD6oR3fTHoB7oHQiEh4u19kWQF7v3PqbfDdkHck",
+       "active_key": "CVA6hPtKDvYHNSXD6oR3fTHoB7oHQiEh4u19kWQF7v3PqbfDdkHck"
     }
   ],
   "initial_assets": [
   ],
   "initial_active_miners": 11,
   "initial_miner_candidates": [{
-      "owner_name": "CVA8gqcFcJ885npDk1DsD2GW51EdWr5GG6z32xmSs3Usgpcqukqzp",
-      "block_signing_key": "CVA8gqcFcJ885npDk1DsD2GW51EdWr5GG6z32xmSs3Usgpcqukqzp"
+      "owner_name": "CVA5jNq3xvd9g18WcXnGQoLiCnaTFWUNAwuPdt2fn5yivZGNomGNF",
+      "block_signing_key": "CVA5jNq3xvd9g18WcXnGQoLiCnaTFWUNAwuPdt2fn5yivZGNomGNF"
     },{
-      "owner_name": "CVA6Z4cwAbUmzWkgbexJyWDac71T7QwYXcexjnT5dswJTGAAMiAvH",
-      "block_signing_key": "CVA6Z4cwAbUmzWkgbexJyWDac71T7QwYXcexjnT5dswJTGAAMiAvH"
+      "owner_name": "CVA6dxZCkFqMtGKMobDH2Uhmis3wZNKHcHDLQphLrLedEPU8QZMzM",
+      "block_signing_key": "CVA6dxZCkFqMtGKMobDH2Uhmis3wZNKHcHDLQphLrLedEPU8QZMzM"
     },{
-      "owner_name": "CVA7BvWbrutnjpo3WjArx1F3pTymMcTBZMRrqCzF3AK1yCzSFsRGC",
-      "block_signing_key": "CVA7BvWbrutnjpo3WjArx1F3pTymMcTBZMRrqCzF3AK1yCzSFsRGC"
+      "owner_name": "CVA76WgTTLUJwF9uYuk2ENzZ2pkUzjdHY6CAnehVmogpdR4NRSXbj",
+      "block_signing_key": "CVA76WgTTLUJwF9uYuk2ENzZ2pkUzjdHY6CAnehVmogpdR4NRSXbj"
     },{
-      "owner_name": "CVA73x429wub7dtrJRbatoz9rE6tAWx1pN8i5yuvbUVChY8ksQrbQ",
-      "block_signing_key": "CVA73x429wub7dtrJRbatoz9rE6tAWx1pN8i5yuvbUVChY8ksQrbQ"
+      "owner_name": "CVA6o4Bgp2X88aMeGHEbsvco4jDJBJHeQn9kKJMeLPL15nDL88NrS",
+      "block_signing_key": "CVA6o4Bgp2X88aMeGHEbsvco4jDJBJHeQn9kKJMeLPL15nDL88NrS"
     },{
-      "owner_name": "CVA7FDmURE9cWJ2C674NMPfHp2Uh93N1bFReTnXvZynupoAJNNktz",
-      "block_signing_key": "CVA7FDmURE9cWJ2C674NMPfHp2Uh93N1bFReTnXvZynupoAJNNktz"
+      "owner_name": "CVA7DDucAydWLuUQCXJxf5BfNg6kEn1a7s8UosnVrRGLfnuZQs9c7",
+      "block_signing_key": "CVA7DDucAydWLuUQCXJxf5BfNg6kEn1a7s8UosnVrRGLfnuZQs9c7"
     },{
-      "owner_name": "CVA5zJUpkQNKg2oDmuJ8yZhtVD9jupezL3w84SZDpuuPcSxwprhSx",
-      "block_signing_key": "CVA5zJUpkQNKg2oDmuJ8yZhtVD9jupezL3w84SZDpuuPcSxwprhSx"
+      "owner_name": "CVA55WFR6xNgoBiJ9qYk8KW9cSWzBh7JyJ2SKPMBrbiEtVhrsJ4z4",
+      "block_signing_key": "CVA55WFR6xNgoBiJ9qYk8KW9cSWzBh7JyJ2SKPMBrbiEtVhrsJ4z4"
     },{
-      "owner_name": "CVA6DWJucmvAR3BBfo713PA4roMkzAvrmnWENgk8g4AeBkHj7yhmQ",
-      "block_signing_key": "CVA6DWJucmvAR3BBfo713PA4roMkzAvrmnWENgk8g4AeBkHj7yhmQ"
+      "owner_name": "CVA6tinXUqzdCTQntzBYdHgPGBoxK5159b7jN1GbcrTfzyf9wVe8D",
+      "block_signing_key": "CVA6tinXUqzdCTQntzBYdHgPGBoxK5159b7jN1GbcrTfzyf9wVe8D"
     },{
-      "owner_name": "CVA84K4aaoBL1WdZLQy1TjhQezoJcwbH3GF2PEav6bq8vNxaxCtpz",
-      "block_signing_key": "CVA84K4aaoBL1WdZLQy1TjhQezoJcwbH3GF2PEav6bq8vNxaxCtpz"
+      "owner_name": "CVA7CQbtHU5ufEtRjHBJTbRWS7hbYQ2B5y4YvRndcjAq1TqpbzFdg",
+      "block_signing_key": "CVA7CQbtHU5ufEtRjHBJTbRWS7hbYQ2B5y4YvRndcjAq1TqpbzFdg"
     },{
-      "owner_name": "CVA5owDsDBa7HctDg6NVgjidEQSHVcn4UbP9FLprnR2y3wvSk3Q17",
-      "block_signing_key": "CVA5owDsDBa7HctDg6NVgjidEQSHVcn4UbP9FLprnR2y3wvSk3Q17"
+      "owner_name": "CVA8kX1UDGWHWLNSV7DYUwi5vFUEizCiHJmKB2y8e8Yhp2cSozjm2",
+      "block_signing_key": "CVA8kX1UDGWHWLNSV7DYUwi5vFUEizCiHJmKB2y8e8Yhp2cSozjm2"
     },{
-      "owner_name": "CVA8VFFSRcasr5p6HnHx1zfJ3QoifSWzseH22oXegZBqciFSGBt9N",
-      "block_signing_key": "CVA8VFFSRcasr5p6HnHx1zfJ3QoifSWzseH22oXegZBqciFSGBt9N"
+      "owner_name": "CVA8Uwk9VKYQkuzwRK3nhtYmGjRPzBsxwc6aCkkKQpXoMhMnYKjDc",
+      "block_signing_key": "CVA8Uwk9VKYQkuzwRK3nhtYmGjRPzBsxwc6aCkkKQpXoMhMnYKjDc"
     },{
-      "owner_name": "CVA7ZvcybkzCBmnDrg4tXd8hmx1TVeZrnCBonrCWuYgeCGVic23vA",
-      "block_signing_key": "CVA7ZvcybkzCBmnDrg4tXd8hmx1TVeZrnCBonrCWuYgeCGVic23vA"
+      "owner_name": "CVA7miDAXtUSMEJpZLgEjYQyVRDe27hCqYUDFTWFVbgDRAwesPTyu",
+      "block_signing_key": "CVA7miDAXtUSMEJpZLgEjYQyVRDe27hCqYUDFTWFVbgDRAwesPTyu"
     }
   ],
   "initial_chain_id": "107e3efd3df89902907f5385026d68237721c2d203e14a506dae7d9ec50675a9",
   "initial_balances": [{
-      "owner": "CVA5hu76UMgs9RbLmuroFgvtLw8P3onig72WcEUFh2Q2CbAFxdcKw",
+      "owner": "CVA8f4eMzscbG1pSTBjxy1n5YdYtfo6tN5KxXGWrDzBctCti155C6",
       "asset_symbol": "CVA",
       "amount": "65000000000000000"
     },{
-      "owner": "CVA5rGHsHxXFy8vT39cb2ftoZCZhDENoC3TurBujzrVe2prSAR7uJ",
+      "owner": "CVA5Ci5J2h4LK4LfnyiNPvMBqHYcwUKUSGCeYiXqfivVrdue1a6yq",
       "asset_symbol": "CVA",
       "amount": "7000000000000000"
     },{
-      "owner": "CVA6YGwP2ya5YBbGfwDaHwjzZpt5VaiKEivS6g8uZD6us5UDPCHe5",
+      "owner": "CVA5T7xzfBKgBarDF3msyQYYZzCNgDmhf4QtkZ1vHSbL7XuFFb6Hn",
       "asset_symbol": "CVA",
       "amount": "5000000000000000"
     },{
-      "owner": "CVA5KtqUqV1HUv3D6Dy8B3wUc5y2D9VKk7U75vB2twLWijYZUakzf",
+      "owner": "CVA7oQ8TKw3NqopYVfUEeQ8mZgNYhfpYNGTNcpz7aQ5ixEttTtyuN",
       "asset_symbol": "CVA",
       "amount": "3000000000000000"
+    },{
+      "owner": "CVA6hPtKDvYHNSXD6oR3fTHoB7oHQiEh4u19kWQF7v3PqbfDdkHck",
+      "asset_symbol": "CVA",
+      "amount": "0"
     }
   ],
   "immutable_parameters": {
