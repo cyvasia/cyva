@@ -94,7 +94,8 @@ int main( int argc, char** argv )
          ("rpc-http-endpoint,H", bpo::value<string>()->implicit_value("127.0.0.1:8093"), "Endpoint for wallet HTTP RPC to listen on")
          ("daemon,d", "Run the wallet in daemon mode" )
          ("wallet-file,w", bpo::value<string>()->implicit_value("wallet.json"), "wallet to load")
-         ("chain-id", bpo::value<string>(), "chain ID to connect to");
+         ("chain-id", bpo::value<string>(), "chain ID to connect to")
+         ("cors-domains", bpo::value<string>()->implicit_value("*"), "CORS Domains");
 
       bpo::variables_map options;
 
@@ -242,7 +243,7 @@ int main( int argc, char** argv )
       auto _websocket_server = std::make_shared<fc::http::websocket_server>();
       if( options.count("rpc-endpoint") )
       {
-         _websocket_server->on_connection([&]( const fc::http::websocket_connection_ptr& c ){
+         _websocket_server->on_connection([&]( const fc::http::websocket_connection_ptr& c, bool& is_tls ){
             std::cout << "here... \n";
             wlog("." );
             auto wsc = std::make_shared<fc::rpc::websocket_api_connection>(*c);
@@ -261,7 +262,7 @@ int main( int argc, char** argv )
       auto _websocket_tls_server = std::make_shared<fc::http::websocket_tls_server>(cert_pem);
       if( options.count("rpc-tls-endpoint") )
       {
-         _websocket_tls_server->on_connection([&]( const fc::http::websocket_connection_ptr& c ){
+         _websocket_tls_server->on_connection([&]( const fc::http::websocket_connection_ptr& c, bool& is_tls ){
             auto wsc = std::make_shared<fc::rpc::websocket_api_connection>(*c);
             wsc->register_api(wapi);
             c->set_session_data( wsc );
@@ -272,6 +273,10 @@ int main( int argc, char** argv )
       }
 
       auto _http_server = std::make_shared<fc::http::server>();
+      if( options.count("cors-domains" ) )
+      {
+          _http_server->set_cors_domains(options.at("cors-domains").as<string>());
+      }
       if( options.count("rpc-http-endpoint" ) )
       {
          ilog( "Listening for incoming HTTP RPC requests on ${p}", ("p", options.at("rpc-http-endpoint").as<string>() ) );

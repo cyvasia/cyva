@@ -192,7 +192,7 @@ namespace graphene { namespace wallet {
  *
  * @defgroup WalletCLI
  */
-      class wallet_api
+      class wallet_api : public fc::api_base<wallet_api>
       {
       public:
          wallet_api( const wallet_data& initial_data, fc::api<login_api> rapi );

@@ -79,7 +79,7 @@ namespace graphene { namespace app {
     *
     * This API contains methods to access account histories
     */
-   class history_api
+   class history_api : public fc::api_base<history_api>
    {
       public:
          history_api(application& app):_app(app){}
@@ -123,7 +123,8 @@ namespace graphene { namespace app {
    /**
     * @brief The network_broadcast_api class allows broadcasting of transactions.
     */
-   class network_broadcast_api : public std::enable_shared_from_this<network_broadcast_api>
+   class network_broadcast_api : public std::enable_shared_from_this<network_broadcast_api>,
+                                 public fc::api_base<network_broadcast_api>
    {
       public:
          network_broadcast_api(application& a);
@@ -188,7 +189,7 @@ namespace graphene { namespace app {
    /**
     * @brief The network_node_api class allows maintenance of p2p connections.
     */
-   class network_node_api
+   class network_node_api : public fc::api_base<network_node_api>
    {
       public:
          network_node_api(application& a);
@@ -238,7 +239,7 @@ namespace graphene { namespace app {
          application& _app;
    };
    
-   class crypto_api
+   class crypto_api : public fc::api_base<crypto_api>
    {
       public:
          crypto_api();
@@ -281,7 +282,7 @@ namespace graphene { namespace app {
     *
     * All other APIs must be requested from this API.
     */
-   class login_api
+   class login_api : public fc::api_base<login_api>
    {
       public:
          login_api(application& a);

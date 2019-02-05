@@ -113,7 +113,7 @@ namespace graphene { namespace app {
  * read-only; all modifications to the database must be performed via transactions. Transactions are broadcast via
  * the @ref network_broadcast_api.
  */
-      class database_api
+      class database_api : public fc::api_base<database_api>
       {
       public:
          database_api(graphene::chain::database& db);

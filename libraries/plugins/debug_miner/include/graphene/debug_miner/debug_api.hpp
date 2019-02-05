@@ -39,7 +39,7 @@ namespace detail {
 class debug_api_impl;
 }
 
-class debug_api
+class debug_api : public fc::api_base<debug_api>
 {
    public:
       debug_api( graphene::app::application& app );

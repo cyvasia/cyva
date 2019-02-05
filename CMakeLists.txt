@@ -45,7 +45,7 @@ if( APPLE )
 
         list( APPEND CMAKE_PREFIX_PATH
               "${HOMEBREW_PREFIX}/opt/openssl"
-              "${HOMEBREW_PREFIX}/opt/boost@1.60"
+              "${HOMEBREW_PREFIX}/opt/boost"
               "${HOMEBREW_PREFIX}/opt/pbc"
               "${HOMEBREW_PREFIX}/opt/gmp"
               "${HOMEBREW_PREFIX}/opt/cryptopp"
@@ -85,7 +85,6 @@ find_package( Boost 1.60 REQUIRED
                system
                filesystem
                program_options
-               signals
                serialization
                chrono
                unit_test_framework
