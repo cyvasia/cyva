@@ -27,7 +27,7 @@
 #include <graphene/app/database_api.hpp>
 
 #include <graphene/chain/protocol/types.hpp>
-
+#include <graphene/chain/protocol/confidential.hpp>
 #include <graphene/debug_miner/debug_api.hpp>
 
 #include <graphene/net/node.hpp>

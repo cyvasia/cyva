@@ -46,6 +46,7 @@ add_library( graphene_chain
              protocol/transaction.cpp
              protocol/block.cpp
              protocol/fee_schedule.cpp
+             protocol/confidential.cpp
 
              protocol/vote.cpp
              protocol/cyva.cpp
@@ -62,6 +63,7 @@ add_library( graphene_chain
              proposal_evaluator.cpp
              vesting_balance_evaluator.cpp
              cyva_evaluator.cpp
+             confidential_evaluator.cpp
 
              account_object.cpp
              asset_object.cpp

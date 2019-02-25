@@ -87,9 +87,10 @@ struct get_impacted_account_visitor
 
    void operator()( const vesting_balance_withdraw_operation& ) {}
 
-   void operator()( const rfu_operation_1& ) {}
-   void operator()( const rfu_operation_2& ) {}
-   void operator()( const rfu_operation_3& ) {}
+   void operator()( const transfer_to_blind_operation& op ) { _impacted.insert( op.from ); for( const auto& out : op.outputs ) add_authority_accounts( _impacted, out.owner ); }
+   void operator()( const blind_transfer_operation& op ) { for( const auto& in : op.inputs ) add_authority_accounts( _impacted, in.owner ); for( const auto& out : op.outputs ) add_authority_accounts( _impacted, out.owner ); }
+   void operator()( const transfer_from_blind_operation& op ) { _impacted.insert( op.to ); for( const auto& in : op.inputs ) add_authority_accounts( _impacted, in.owner ); }
+
    void operator()( const rfu_operation_4& ) {}
    void operator()( const rfu_operation_5& ) {}
    void operator()( const rfu_operation_6& ) {}

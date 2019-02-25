@@ -38,9 +38,9 @@ struct rfu_operation_ ## N : public base_operation                              
     FC_REFLECT( graphene::chain::rfu_operation_ ## N, (fee) )                               \
 
 
-RFU_OP(1)
-RFU_OP(2)
-RFU_OP(3)
+//RFU_OP(1)
+//RFU_OP(2)
+//RFU_OP(3)
 RFU_OP(4)
 RFU_OP(5)
 RFU_OP(6)

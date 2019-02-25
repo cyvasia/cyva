@@ -44,9 +44,9 @@ struct rfu_evaluator_ ## N : public evaluator<rfu_evaluator_ ## N>              
 };  }}                                                                                            \
 
 
-RFU_EVAL(1)
-RFU_EVAL(2)
-RFU_EVAL(3)
+//RFU_EVAL(1)
+//RFU_EVAL(2)
+//RFU_EVAL(3)
 RFU_EVAL(4)
 RFU_EVAL(5)
 RFU_EVAL(6)

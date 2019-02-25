@@ -137,7 +137,8 @@ namespace graphene { namespace chain {
       impl_chain_property_object_type,
       impl_miner_schedule_object_type,
       impl_budget_record_object_type,
-      impl_transaction_detail_object_type
+      impl_transaction_detail_object_type,
+      impl_blinded_balance_object_type
    };
 
    //typedef fc::unsigned_int            object_id_type;
@@ -172,6 +173,7 @@ namespace graphene { namespace chain {
    class miner_schedule_object;
    class budget_record_object;
    class transaction_detail_object;
+   class blinded_balance_object;
 
    typedef object_id< implementation_ids, impl_global_property_object_type,  global_property_object>                    global_property_id_type;
    typedef object_id< implementation_ids, impl_dynamic_global_property_object_type,  dynamic_global_property_object>    dynamic_global_property_id_type;
@@ -188,6 +190,7 @@ namespace graphene { namespace chain {
    typedef object_id< implementation_ids, impl_miner_schedule_object_type, miner_schedule_object>                   miner_schedule_id_type;
    typedef object_id< implementation_ids, impl_budget_record_object_type, budget_record_object >                        budget_record_id_type;
    typedef object_id< implementation_ids, impl_transaction_detail_object_type, transaction_detail_object >              transaction_detail_id_type;
+   typedef object_id< implementation_ids, impl_blinded_balance_object_type, blinded_balance_object >              blinded_balance_id_type;
 
    typedef fc::array<char, GRAPHENE_MAX_ASSET_SYMBOL_LENGTH>    symbol_type;
    typedef fc::ripemd160                                        block_id_type;
@@ -323,6 +326,7 @@ FC_REFLECT_ENUM( graphene::chain::impl_object_type,
                  (impl_miner_schedule_object_type)
                  (impl_budget_record_object_type)
                  (impl_transaction_detail_object_type)
+                 (impl_blinded_balance_object_type)
                )
 
 FC_REFLECT_TYPENAME( graphene::chain::share_type )
@@ -344,5 +348,6 @@ FC_REFLECT_TYPENAME( graphene::chain::block_summary_id_type )
 FC_REFLECT_TYPENAME( graphene::chain::account_transaction_history_id_type )
 FC_REFLECT_TYPENAME( graphene::chain::budget_record_id_type )
 FC_REFLECT_TYPENAME( graphene::chain::transaction_detail_id_type )
+FC_REFLECT_TYPENAME( graphene::chain::blinded_balance_id_type )
 
 FC_REFLECT_EMPTY( graphene::chain::void_t )

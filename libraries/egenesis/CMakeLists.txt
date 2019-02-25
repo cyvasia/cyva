@@ -14,8 +14,11 @@ add_executable( embed_genesis
 
 target_link_libraries( embed_genesis graphene_chain graphene_app graphene_egenesis_none fc )
 
-set(GRAPHENE_EGENESIS_JSON  ${CMAKE_SOURCE_DIR}/genesis.json)
-
+if(MAINNET)
+    set(GRAPHENE_EGENESIS_JSON  ${CMAKE_SOURCE_DIR}/genesis.json)
+else()
+    set(GRAPHENE_EGENESIS_JSON  ${CMAKE_SOURCE_DIR}/genesis-testnet.json)
+endif()
 
 set( embed_genesis_args
    "${CMAKE_CURRENT_BINARY_DIR}/embed_genesis -t ${CMAKE_CURRENT_SOURCE_DIR}/egenesis_brief.cpp.tmpl---${CMAKE_CURRENT_SOURCE_DIR}/egenesis_brief.cpp -t ${CMAKE_CURRENT_SOURCE_DIR}/egenesis_full.cpp.tmpl---${CMAKE_CURRENT_SOURCE_DIR}/egenesis_full.cpp -t ${CMAKE_CURRENT_SOURCE_DIR}/egenesis_cyva.cpp.tmpl---${CMAKE_CURRENT_SOURCE_DIR}/egenesis_cyva.cpp -t ${CMAKE_CURRENT_SOURCE_DIR}/egenesis_brief.cpp.tmpl---${CMAKE_CURRENT_BINARY_DIR}/egenesis_brief.cpp -t ${CMAKE_CURRENT_SOURCE_DIR}/egenesis_full.cpp.tmpl---${CMAKE_CURRENT_BINARY_DIR}/egenesis_full.cpp -t ${CMAKE_CURRENT_SOURCE_DIR}/egenesis_cyva.cpp.tmpl---${CMAKE_CURRENT_BINARY_DIR}/egenesis_cyva.cpp --genesis-json ${GRAPHENE_EGENESIS_JSON}"

@@ -38,6 +38,7 @@
 #include <graphene/chain/miner_object.hpp>
 #include <graphene/chain/budget_record_object.hpp>
 #include <graphene/chain/transaction_detail_object.hpp>
+#include <graphene/chain/confidential_object.hpp>
 
 #include <fc/api.hpp>
 #include <fc/optional.hpp>
@@ -559,6 +560,15 @@ namespace graphene { namespace app {
           */
          vector<proposal_object> get_proposed_transactions( account_id_type id )const;
 
+         //////////////////////
+         // Blinded balances //
+         //////////////////////
+
+         /**
+          *  @return the set of blinded balance objects by commitment ID
+          */
+         vector<blinded_balance_object> get_blinded_balances( const flat_set<commitment_type>& commitments )const;
+
          ////////////
          // CYVA //
          ////////////
@@ -659,6 +669,9 @@ FC_API(graphene::app::database_api,
 
           // Proposed transactions
           (get_proposed_transactions)
+
+          // Blinded balances
+          (get_blinded_balances)
 
           // CYVA
           (get_real_supply)

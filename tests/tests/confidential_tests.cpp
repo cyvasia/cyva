@@ -1,4 +1,3 @@
-/* (c) 2018 CYVA Net. For details refers to LICENSE.txt */
 /*
  * Copyright (c) 2015 Cryptonomex, Inc., and contributors.
  *
@@ -31,6 +30,7 @@
 
 #include <graphene/chain/account_object.hpp>
 #include <graphene/chain/asset_object.hpp>
+#include <graphene/chain/committee_member_object.hpp>
 #include <graphene/chain/proposal_object.hpp>
 
 #include <graphene/db/simple_index.hpp>

@@ -31,6 +31,7 @@
 #include <graphene/chain/protocol/miner.hpp>
 #include <graphene/chain/protocol/cyva.hpp>
 #include <graphene/chain/protocol/rfu.hpp>
+#include <graphene/chain/protocol/confidential.hpp>
 
 namespace graphene { namespace chain {
 
@@ -52,9 +53,9 @@ namespace graphene { namespace chain {
             set_transfer_freeze_block_operation,
             vesting_balance_create_operation,//10
             vesting_balance_withdraw_operation,
-            rfu_operation_1,
-            rfu_operation_2,
-            rfu_operation_3,
+            transfer_to_blind_operation,
+            blind_transfer_operation,
+            transfer_from_blind_operation,
             rfu_operation_4,
             rfu_operation_5,
             rfu_operation_6,

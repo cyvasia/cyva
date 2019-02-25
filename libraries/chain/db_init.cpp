@@ -37,6 +37,7 @@
 #include <graphene/chain/miner_object.hpp>
 #include <graphene/chain/miner_schedule_object.hpp>
 #include <graphene/chain/transaction_detail_object.hpp>
+#include <graphene/chain/confidential_object.hpp>
 
 #include <graphene/chain/account_evaluator.hpp>
 #include <graphene/chain/cyva_evaluator.hpp>
@@ -44,6 +45,7 @@
 #include <graphene/chain/transfer_evaluator.hpp>
 #include <graphene/chain/vesting_balance_evaluator.hpp>
 #include <graphene/chain/miner_evaluator.hpp>
+#include <graphene/chain/confidential_evaluator.hpp>
 #include <graphene/chain/rfu_evaluator.hpp>
 
 #include <graphene/chain/protocol/fee_schedule.hpp>
@@ -108,9 +110,9 @@ void database::initialize_evaluators()
    register_evaluator<miner_create_evaluator>();
    register_evaluator<miner_update_evaluator>();
    register_evaluator<miner_update_global_parameters_evaluator>();
-   register_evaluator<rfu_evaluator_1>();
-   register_evaluator<rfu_evaluator_2>();
-   register_evaluator<rfu_evaluator_3>();
+   register_evaluator<transfer_to_blind_evaluator>();
+   register_evaluator<transfer_from_blind_evaluator>();
+   register_evaluator<blind_transfer_evaluator>();
    register_evaluator<rfu_evaluator_4>();
    register_evaluator<rfu_evaluator_5>();
    register_evaluator<rfu_evaluator_6>();
@@ -191,6 +193,7 @@ void database::initialize_indexes()
    prop_index->add_secondary_index<required_approval_index>();
 
    add_index< primary_index<vesting_balance_index> >();
+   add_index< primary_index<blinded_balance_index> >();
 
    //Implementation object indexes
    add_index< primary_index<transaction_index                             > >();
