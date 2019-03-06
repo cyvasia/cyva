@@ -1793,11 +1793,39 @@ public:
       return my->copy_wallet_file(destination_filename);
    }
 
-   optional<signed_block_with_info> wallet_api::get_block(uint32_t num)
+   optional<signed_block_with_info> wallet_api::get_block(uint32_t num) const
    {
       optional<signed_block_with_info> result = my->_remote_db->get_block(num);
 
       return result;
+   }
+
+   vector<pair<uint32_t, signed_block_with_info>> wallet_api::get_blocks_starting_from(uint32_t block_num, uint32_t count, bool skip_empty)const
+   {
+       vector<pair<uint32_t, signed_block_with_info>> result;
+       result.reserve(std::min(count, uint32_t(10000)));
+
+       size_t index = block_num;
+       while (true)
+       {
+          auto op_block = get_block(index);
+          ++index;
+          if (false == op_block.valid() ||
+             result.size() == count)
+              break;
+          if (op_block->transactions.empty() &&
+             skip_empty)
+              continue;
+
+          result.push_back(std::make_pair(index - 1, *op_block));
+       }
+
+       return result;
+   }
+
+   vector<asset> wallet_api::get_account_balances(account_id_type id, const flat_set<asset_id_type>& assets)const
+   {
+       return my->_remote_db->get_account_balances(id, assets);
    }
 
    uint64_t wallet_api::get_account_count() const

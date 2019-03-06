@@ -324,7 +324,25 @@ namespace graphene { namespace wallet {
           * @return the referenced block with info, or null if no matching block was found
           * @ingroup WalletCLI
           */
-         optional<signed_block_with_info>    get_block( uint32_t num );
+         optional<signed_block_with_info>    get_block( uint32_t num ) const;
+
+         /**
+          * @brief Retrieve an array of full, signed blocks
+          * @param block first block Height of blocks to be returned
+          * @param skip_empty specify if don't need empty blocks
+          * @return an array of referenced blocks
+          * @ingroup DatabaseAPI
+          */
+         vector<pair<uint32_t, signed_block_with_info>> get_blocks_starting_from(uint32_t block_num, uint32_t count, bool skip_empty)const;
+
+         /**
+          * @brief Get an account's balances in various assets
+          * @param id ID of the account to get balances for
+          * @param assets IDs of the assets to get balances of; if empty, get all assets account has a balance in
+          * @return Balances of the account
+          * @ingroup DatabaseAPI
+          */
+         vector<asset> get_account_balances(account_id_type id, const flat_set<asset_id_type>& assets)const;
 
          /**
           * @brief Returns the number of accounts registered on the blockchain
@@ -1333,6 +1351,8 @@ FC_API( graphene::wallet::wallet_api,
            (get_account)
            (get_account_id)
            (get_block)
+           (get_blocks_starting_from)
+           (get_account_balances)
            (get_account_count)
            (get_account_history)
            (search_account_history)
