@@ -7,4 +7,3 @@
 [submodule "libraries/contrib/fc"]
 	path = libraries/contrib/fc
 	url = https://github.com/cyvasia/fc.git
-	branch = master

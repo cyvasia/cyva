@@ -53,6 +53,8 @@
 #include <boost/multi_index/sequenced_index.hpp>
 #include <boost/multi_index/hashed_index.hpp>
 
+#include <boost/range/combine.hpp>
+
 #include <fc/git_revision.hpp>
 #include <fc/io/fstream.hpp>
 #include <fc/io/json.hpp>
@@ -984,6 +986,57 @@ public:
 
       return result;
    } FC_CAPTURE_AND_RETHROW( (account_name) )
+   }
+
+   void cook_transaction(signed_transaction & tx)
+   {
+       auto dyn_props = get_dynamic_global_properties();
+       tx.set_reference_block( dyn_props.head_block_id );
+
+       // first, some bookkeeping, expire old items from _recently_generated_transactions
+       // since transactions include the head block id, we just need the index for keeping transactions unique
+       // when there are multiple transactions in the same block.  choose a time period that should be at
+       // least one block long, even in the worst case.  2 minutes ought to be plenty.
+       fc::time_point_sec oldest_transaction_ids_to_track(dyn_props.time - fc::minutes(2));
+       auto oldest_transaction_record_iter = _recently_generated_transactions.get<timestamp_index>().lower_bound(oldest_transaction_ids_to_track);
+       auto begin_iter = _recently_generated_transactions.get<timestamp_index>().begin();
+       _recently_generated_transactions.get<timestamp_index>().erase(begin_iter, oldest_transaction_record_iter);
+
+       uint32_t expiration_time_offset = 0;
+       for (;;)
+       {
+           tx.set_expiration( dyn_props.time + fc::seconds(30 + expiration_time_offset) );
+
+           graphene::chain::transaction_id_type this_transaction_id = tx.id();
+           auto iter = _recently_generated_transactions.find(this_transaction_id);
+           if (iter == _recently_generated_transactions.end())
+           {
+               // we haven't generated this transaction before, the usual case
+               recently_generated_transaction_record this_transaction_record;
+               this_transaction_record.generation_time = dyn_props.time;
+               this_transaction_record.transaction_id = this_transaction_id;
+               _recently_generated_transactions.insert(this_transaction_record);
+               break;
+           }
+
+           // else we've generated a dupe, increment expiration time and re-sign it
+           ++expiration_time_offset;
+       }
+   }
+
+   signed_transaction serve_cooked_transaction(signed_transaction const & tx)
+   {
+       try
+       {
+           elog("about to broadcast tx: ${t}", ("t", tx));
+           _remote_net_broadcast->broadcast_transaction( tx );
+       }
+       catch (const fc::exception& e)
+       {
+           elog("Caught exception while broadcasting tx ${id}:  ${e}", ("id", tx.id().str())("e", e.to_detail_string()) );
+           throw;
+       }
+       return tx;
    }
 
 
@@ -3266,7 +3319,279 @@ public:
       return result;
    }
 
+   static auto build_confidential_tx = [](const string &A_, const string &B_, int64_t val, bool generate_range_proof)
+   {
+       auto tx_key_s = fc::ecc::private_key::generate();
+       auto tx_key_p = tx_key_s.get_public_key();
+       auto T_ = public_key_type(tx_key_p);
+       fc::ecc::public_key A = public_key_type(A_);
+       fc::ecc::public_key B = public_key_type(B_);
 
+       auto nonce = fc::sha256::hash(tx_key_s.get_secret());
+       auto addr_blind = fc::sha256::hash(tx_key_s.get_shared_secret(A));
+       auto P = B.add(addr_blind);
+       auto P_ = public_key_type(P);
+
+       auto shared_secret = tx_key_s.get_shared_secret(B);
+       auto blind_factor = fc::sha256::hash(shared_secret);
+
+       auto data = fc::aes_encrypt(shared_secret, fc::raw::pack(val));
+       auto commitment = fc::ecc::blind(blind_factor, val);
+       optional<vector<char>> commitment_range_proof;
+       if(generate_range_proof)
+           commitment_range_proof = fc::ecc::range_proof_sign( 0, commitment, blind_factor, nonce,  0, 0, val);
+       return make_tuple(T_, P_, blind_factor, commitment, data, commitment_range_proof);
+   };
+
+   vector<confidential_tx_object> wallet_api::get_confidential_transactions(const string &A, const string &B) const
+   {
+       FC_ASSERT( !is_locked() );
+       auto Ap = public_key_type(A);
+       auto As = my->_keys[Ap];
+       return my->_remote_db->get_confidential_transactions(As, B);
+   }
+
+   asset wallet_api::get_confidential_balance(const string &A, const string &B, string asset_symbol) const
+   {
+       FC_ASSERT( !is_locked() );
+       fc::optional<asset_object> asset_obj = get_asset(asset_symbol);
+       FC_ASSERT(asset_obj, "Could not find asset matching ${asset}", ("asset", asset_symbol));
+
+       auto Ap = public_key_type(A);
+       auto As = my->_keys[Ap];
+       auto Bp = public_key_type(B);
+       auto Bs = my->_keys[Bp];
+
+       auto owner_private_a = *wif_to_key(As);
+       auto owner_private_b = *wif_to_key(Bs);
+
+       auto _atxs =  my->_remote_db->get_confidential_transactions(As, B);
+
+       asset total_amount = asset_obj->amount(0);
+       for( auto && tx : _atxs)
+       {
+           auto shared_secret = owner_private_b.get_shared_secret(tx.tx_key);
+           asset amount = asset_obj->amount(0);
+           fc::raw::unpack(fc::aes_decrypt(shared_secret, tx.data), amount.amount.value);
+           if (amount.amount.value == 0)
+               continue;
+
+           total_amount += amount;
+       }
+
+       return total_amount;
+   }
+
+   /**
+    *  Transfers a public balance from @from to one or more confidential balances using a
+    *  confidential transfer.
+    */
+   void wallet_api::transfer_to_confidential( string from_account_id_or_name,
+                                      string asset_symbol,
+                                      /** map from key or label to amount */
+                                      vector<pair<string, string>> to_addresses,
+                                      vector<string> to_amounts)
+   { try {
+      FC_ASSERT( !is_locked() );
+
+      account_object from_account = my->get_account(from_account_id_or_name);
+
+      fc::optional<asset_object> asset_obj = get_asset(asset_symbol);
+      FC_ASSERT(asset_obj, "Could not find asset matching ${asset}", ("asset", asset_symbol));
+
+      transfer_to_confidential_operation op;
+      op.from = from_account.id;
+
+      vector<fc::sha256> blinding_factors;
+
+      asset total_amount = asset_obj->amount(0);
+
+      for( auto item : boost::combine(to_addresses, to_amounts) )
+      {
+          confidential_tx out;
+          auto to_address = boost::get<0>(item);
+          auto to_amount = boost::get<1>(item);
+          auto amount = asset_obj->amount_from_string(to_amount);
+
+          auto v = build_confidential_tx(std::get<0>(to_address), std::get<1>(to_address), amount.amount.value, (to_amounts.size() > 1));
+
+          out.tx_key = std::get<0>(v);
+          out.owner = std::get<1>(v);
+          out.commitment = std::get<3>(v);
+          out.data = std::get<4>(v);
+
+          total_amount += amount;
+
+          if(std::get<5>(v))
+              out.range_proof = *std::get<5>(v);
+          blinding_factors.push_back(std::get<2>(v));
+
+          op.outputs.push_back(out);
+      }
+      op.amount          = total_amount;
+      op.blinding_factor = fc::ecc::blind_sum( blinding_factors, blinding_factors.size());
+
+      /** commitments must be in sorted order */
+      std::sort( op.outputs.begin(), op.outputs.end(), [&]( const confidential_tx& a, const confidential_tx& b )
+      {
+          return a.commitment < b.commitment;
+      });
+
+      signed_transaction trx;
+
+      trx.operations.push_back(op);
+      my->set_operation_fees(trx, my->_remote_db->get_global_properties().parameters.current_fees);
+      trx.validate();
+      sign_transaction(trx, true);
+
+   } FC_CAPTURE_AND_RETHROW( (from_account_id_or_name)(asset_symbol)(to_amounts) ) }
+
+   /**
+    *  Transfers a public balance from @from to one or more confidential balances using a
+    *  confidential transfer.
+    */
+   void wallet_api::transfer_from_confidential( string const &A, string const &B,
+                                        string asset_symbol,
+                                        /** map from key or label to amount */
+                                        vector<pair<string, string>> to_addresses,
+                                        vector<string> to_amounts)
+   { try {
+      FC_ASSERT( !is_locked() );
+
+      bool enough_balance = false;
+      transfer_from_confidential_operation op;
+      fc::optional<asset_object> asset_obj = get_asset(asset_symbol);
+      FC_ASSERT(asset_obj, "Could not find asset matching ${asset}", ("asset", asset_symbol));
+      auto cf = my->_remote_db->get_global_properties().parameters.current_fees;
+      auto base_fee = cf->calculate_fee(op);
+      op.outputs.resize(1);
+      auto per_out = cf->calculate_fee(op) - base_fee;
+      op.outputs.clear();
+
+      asset total_amount_out = asset_obj->amount(0);
+      asset total_amount_in = asset_obj->amount(0);
+
+      auto Ap = public_key_type(A);
+      auto Bp = public_key_type(B);
+      auto As = my->_keys[Ap];
+      auto Bs = my->_keys[Bp];
+
+      auto owner_private_a = *wif_to_key(As);
+      auto owner_private_b = *wif_to_key(Bs);
+
+
+      vector<fc::sha256> blinding_factors_in, blinding_factors_out;
+      vector<private_key_type> sks;
+
+
+      for (auto && a : to_amounts)
+      {
+          auto amount = asset_obj->amount_from_string(a);
+          total_amount_out += amount;
+      }
+
+      auto _atxs = get_confidential_transactions(A, B);
+      FC_ASSERT(_atxs.size() > 0, "No confidential transactions for ${A} ${B}", ("A", A)("B", B));
+
+      for( auto && tx : _atxs)
+      {
+          confidential_tx in;
+          in.commitment = tx.commitment;
+          in.tx_key = tx.tx_key;
+          in.owner = tx.owner;
+          in.range_proof = tx.range_proof;
+          in.data = tx.data;
+
+          auto shared_secret = owner_private_b.get_shared_secret(in.tx_key);
+          auto blind_factor = fc::sha256::hash(shared_secret);
+          blinding_factors_in.push_back(blind_factor);
+
+          asset amount = asset_obj->amount(0);
+
+          fc::raw::unpack(fc::aes_decrypt(shared_secret, in.data), amount.amount.value);
+          if (amount.amount.value == 0)
+              continue;
+
+          total_amount_in += amount;
+
+          op.inputs.push_back(in);
+
+          if(total_amount_in > total_amount_out + base_fee + (to_amounts.size() + 1) * per_out)
+          {
+              auto _change = total_amount_in - total_amount_out - (base_fee + (to_amounts.size() + 1) * per_out);
+
+              to_addresses.push_back({A, B});
+              to_amounts.push_back(asset_obj->amount_to_string(_change));
+
+              enough_balance = true;
+              break;
+          }
+          else if(total_amount_in == total_amount_out + base_fee + to_amounts.size() * per_out)
+          {
+              enough_balance = true;
+              break;
+          }
+      }
+
+      FC_ASSERT(enough_balance, "Not enough balance");
+
+
+      for( auto && in : op.inputs)
+      {
+          auto S = fc::ecc::private_key::generate_from_seed(owner_private_b.get_secret(),
+                                                            fc::sha256::hash(owner_private_a.get_shared_secret(in.tx_key)));
+          sks.push_back(S);
+      }
+
+      auto ct_n = std::count_if(to_addresses.begin(), to_addresses.end(), [](pair<string, string> const & addr) { return not addr.second.empty(); });
+      for( auto item : boost::combine(to_addresses, to_amounts) )
+      {
+          auto to_address = boost::get<0>(item);
+          auto to_amount = boost::get<1>(item);
+          auto amount = asset_obj->amount_from_string(to_amount);
+          if(not to_address.second.empty())
+          {
+              auto v = build_confidential_tx(to_address.first, to_address.second, amount.amount.value, ct_n > 1);
+              confidential_tx out;
+              out.tx_key = std::get<0>(v);
+              out.owner = std::get<1>(v);
+              out.commitment  = std::get<3>(v);
+              if(std::get<5>(v))
+                  out.range_proof = *std::get<5>(v);
+              out.data = std::get<4>(v);
+
+              blinding_factors_out.push_back(std::get<2>(v));
+              op.outputs.push_back(out);
+          }
+          else
+          {
+              op.to.push_back(get_account_id(to_address.first));
+              op.amount.push_back(amount);
+          }
+      }
+      /** commitments must be in sorted order */
+      std::sort( op.outputs.begin(), op.outputs.end(), [&]( const confidential_tx& a, const confidential_tx& b)
+                {
+                    return a.commitment < b.commitment;
+                });
+
+      auto nn = blinding_factors_in.size();
+      std::copy(blinding_factors_out.begin(), blinding_factors_out.end(), std::back_inserter(blinding_factors_in));
+      op.blinding_factor = fc::ecc::blind_sum(blinding_factors_in, nn);
+
+      signed_transaction trx;
+      trx.operations.push_back(op);
+
+      my->set_operation_fees(trx, cf);
+      trx.validate();
+      my->cook_transaction(trx);
+
+      for (auto && sk : sks)
+          trx.sign(sk, my->get_chain_properties().chain_id);
+
+      my->serve_cooked_transaction(trx);
+
+       } FC_CAPTURE_AND_RETHROW( (A)(B)(asset_symbol)(to_amounts) ) }
 } } // graphene::wallet
 
 

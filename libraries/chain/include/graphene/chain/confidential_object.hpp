@@ -23,6 +23,7 @@
  */
 #pragma once
 
+#include <graphene/chain/protocol/confidential.hpp>
 #include <graphene/chain/protocol/authority.hpp>
 #include <graphene/chain/protocol/types.hpp>
 
@@ -69,3 +70,45 @@ typedef generic_index<blinded_balance_object, blinded_balance_object_multi_index
 } } // graphene::chain
 
 FC_REFLECT_DERIVED( graphene::chain::blinded_balance_object, (graphene::db::object), (commitment)(asset_id)(owner) )
+
+/** Confidential transactions */
+namespace graphene { namespace chain {
+
+/**
+ * @class confidential_tx_object
+ * @brief tracks confidential transactions
+ * @ingroup object
+ * @ingroup protocol
+ */
+
+class confidential_tx_object : public graphene::db::abstract_object<confidential_tx_object>
+{
+   public:
+      static const uint8_t space_id = implementation_ids;
+      static const uint8_t type_id  = impl_confidential_tx_object_type;
+
+      fc::ecc::commitment_type                commitment;
+      public_key_type                         tx_key;
+      public_key_type                         owner;
+      vector<char>                            data;
+      optional<range_proof_type>              range_proof; ///< only required if there is more than one blind output
+};
+
+struct by_tx;
+
+/**
+ * @ingroup object_index
+ */
+typedef multi_index_container<
+   confidential_tx_object,
+   indexed_by<
+      ordered_unique< tag<by_id>, member< object, object_id_type, &object::id > >,
+      ordered_unique< tag<by_commitment>, member<confidential_tx_object, commitment_type, &confidential_tx_object::commitment> >,
+      ordered_unique< tag<by_tx>, member<confidential_tx_object, public_key_type, &confidential_tx_object::tx_key> >
+   >
+> confidential_tx_object_multi_index_type;
+typedef generic_index<confidential_tx_object, confidential_tx_object_multi_index_type> confidential_tx_index;
+
+} } // graphene::chain
+
+FC_REFLECT_DERIVED( graphene::chain::confidential_tx_object, (graphene::db::object), (commitment)(tx_key)(owner)(data)(range_proof) )

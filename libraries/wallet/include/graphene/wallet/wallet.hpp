@@ -1258,6 +1258,25 @@ namespace graphene { namespace wallet {
                                             string symbol,
                                             bool broadcast = false,
                                             bool to_temp = false );
+
+         /**
+          *  Transfers a public balance from @from to one or more confidential balances using a
+          *  confidential transfer.
+          */
+         void transfer_to_confidential(string from_account_id_or_name,
+                               string asset_symbol,
+                               /** map from key or label to amount */
+                               vector<pair<string, string> > to_addresses,
+                               vector<string> to_amounts);
+
+         void transfer_from_confidential(const string &A, const string &B,
+                                  string asset_symbol,
+                                  /** map from key or label to amount */
+                                  vector<pair<string, string>> to_addresses,
+                                  vector<string> to_amounts);
+
+         vector<confidential_tx_object> get_confidential_transactions(const string &a, const string &B )const;
+         asset get_confidential_balance(const string &A, const string &B, string asset_symbol) const;
       };
 
 
@@ -1403,4 +1422,8 @@ FC_API( graphene::wallet::wallet_api,
            (blind_transfer)
            (blind_history)
            (receive_blind_transfer)
-)
+           (transfer_from_confidential)
+           (transfer_to_confidential)
+           (get_confidential_transactions)
+           (get_confidential_balance)
+           )

@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 #include <graphene/chain/protocol/confidential.hpp>
 #include <graphene/chain/confidential_evaluator.hpp>
 #include <graphene/chain/database.hpp>
@@ -30,6 +31,7 @@
 #include <fc/crypto/elliptic.hpp>
 
 namespace graphene { namespace chain {
+
 
 void transfer_to_blind_operation::validate()const
 {
@@ -49,9 +51,9 @@ void transfer_to_blind_operation::validate()const
    }
    FC_ASSERT( out.size(), "there must be at least one output" );
 
-   auto public_c = fc::ecc::blind(blinding_factor,net_public);
+   auto public_c = fc::ecc::blind(blinding_factor, net_public);
 
-   FC_ASSERT( fc::ecc::verify_sum( {public_c}, out, 0 ), "", ("net_public",net_public) );
+   FC_ASSERT( fc::ecc::verify_sum( {public_c}, out, 0 ), "", ("net_public", net_public) );
 
    if( outputs.size() > 1 )
    {
@@ -140,9 +142,6 @@ share_type blind_transfer_operation::calculate_fee( const fee_parameters_type& k
     return k.fee + outputs.size() * k.price_per_output;
 }
 
-
-
-
 /**
  *  Packs *this then encodes as base58 encoded string.
  */
@@ -150,6 +149,7 @@ stealth_confirmation::operator string()const
 {
    return fc::to_base58( fc::raw::pack( *this ) );
 }
+
 /**
  * Unpacks from a base58 string
  */
@@ -159,5 +159,85 @@ stealth_confirmation::stealth_confirmation( const std::string& base58 )
 }
 
 
+void transfer_to_confidential_operation::validate()const
+{
+   FC_ASSERT( fee.amount >= 0 );
+   FC_ASSERT( amount.amount > 0 );
+   FC_ASSERT( outputs.size(), "there must be at least one output" );
+   FC_ASSERT( std::is_sorted(outputs.begin(), outputs.end(), [](const confidential_tx &a, const confidential_tx &b){ return a.commitment < b.commitment; }),
+              "all outputs must be sorted by commitment id" );
+
+   auto in_commit = fc::ecc::blind(blinding_factor, amount.amount.value);
+
+   vector<commitment_type> out_commits(outputs.size());
+   std::transform(outputs.begin(), outputs.end(), out_commits.begin(), [](const confidential_tx & a){ return a.commitment; });
+
+   FC_ASSERT( fc::ecc::verify_sum( {in_commit}, out_commits, 0), "imbalance");
+
+
+   if( outputs.size() > 1 )
+   {
+      for( auto out : outputs )
+      {
+         auto info = fc::ecc::range_get_info( *out.range_proof );
+         FC_ASSERT( info.max_value <= GRAPHENE_MAX_SHARE_SUPPLY );
+      }
+   }
+}
+
+share_type transfer_to_confidential_operation::calculate_fee( const fee_parameters_type& k )const
+{
+    return k.fee + outputs.size() * k.price_per_output;
+}
+
+
+void transfer_from_confidential_operation::get_required_authorities( vector<authority>& a )const
+{
+    std::transform(inputs.begin(), inputs.end(), std::back_inserter(a), [](const confidential_tx &in) { return authority(1, in.owner, 1); });
+}
+
+/**
+ *  This method can be computationally intensive because it verifies that input commitments - output commitments - fee - amounts == 0
+ */
+void transfer_from_confidential_operation::validate()const
+{ try {
+   FC_ASSERT( fee.amount >= 0 );
+   for(auto && a : amount)
+       FC_ASSERT( a.amount > 0, "non positive amount");
+   vector<commitment_type> in_commits(inputs.size());
+   vector<commitment_type> out_commits(outputs.size());
+
+   asset                 public_volume = fee;
+   public_volume = std::accumulate(amount.begin(), amount.end(), public_volume);
+   auto out_commit = fc::ecc::blind(blinding_factor, public_volume.amount.value);
+
+   std::transform(inputs.begin(), inputs.end(), in_commits.begin(), [](const confidential_tx & a){ return a.commitment; });
+   std::transform(outputs.begin(), outputs.end(), out_commits.begin(), [](const confidential_tx & a){ return a.commitment; });
+
+   FC_ASSERT( in_commits.size(), "there must be at least one input" );
+   FC_ASSERT( amount.size() == to.size(), "amounts and addresses sizes should match");
+   FC_ASSERT( std::is_sorted(in_commits.begin(), in_commits.end()), "all inputs must be sorted by commitment");
+   FC_ASSERT( std::is_sorted(out_commits.begin(), out_commits.end()), "all outputs must be sorted by commitment");
+
+   if( outputs.size() > 1 )
+   {
+       for( auto out : outputs )
+       {
+           auto info = fc::ecc::range_get_info( *out.range_proof );
+           FC_ASSERT( info.max_value <= GRAPHENE_MAX_SHARE_SUPPLY );
+       }
+   }
+
+   out_commits.push_back(out_commit);
+
+   FC_ASSERT( fc::ecc::verify_sum(in_commits, out_commits, 0), "imbalance");
+
+
+} FC_CAPTURE_AND_RETHROW( (*this) ) }
+
+share_type transfer_from_confidential_operation::calculate_fee( const fee_parameters_type& k )const
+{
+    return k.fee + (outputs.size() + to.size()) * k.price_per_output;
+}
 
 } } // graphene::chain

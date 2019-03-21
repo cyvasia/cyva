@@ -28,13 +28,15 @@
 #include <graphene/chain/database.hpp>
 #include <graphene/chain/hardfork.hpp>
 
+#include <boost/range/combine.hpp>
+
 namespace graphene { namespace chain {
 
 void_result transfer_to_blind_evaluator::do_evaluate( const transfer_to_blind_operation& o )
 { try {
    const auto& d = db();
 
-   const auto& atype = o.amount.asset_id(db()); 
+   const auto& atype = o.amount.asset_id(db());
 
    for( const auto& out : o.outputs )
    {
@@ -165,4 +167,85 @@ void blind_transfer_evaluator::pay_fee()
       generic_evaluator::pay_fee();
 }
 
+void_result transfer_to_confidential_evaluator::do_evaluate( const operation_type& op )
+{ try { return void_result(); } FC_CAPTURE_AND_RETHROW( (op) ) }
+
+
+void_result transfer_to_confidential_evaluator::do_apply( const operation_type& op )
+{ try {
+
+   const auto& add = op.amount.asset_id(db()).dynamic_asset_data_id(db());  // verify fee is a legit asset
+
+   db().adjust_balance( op.from, -op.amount );
+   db().modify( add, [&]( asset_dynamic_data_object& obj )
+   {
+      obj.confidential_supply += op.amount.amount;
+      FC_ASSERT( obj.confidential_supply >= 0 );
+   });
+   for( const auto& out : op.outputs )
+   {
+      db().create<confidential_tx_object>( [&]( confidential_tx_object& obj ){
+           obj.commitment = out.commitment;
+           obj.tx_key = out.tx_key;
+           obj.owner = out.owner;
+           obj.range_proof = out.range_proof;
+           obj.data = out.data;
+      });
+   }
+   return void_result();
+} FC_CAPTURE_AND_RETHROW( (op) ) }
+
+void transfer_to_confidential_evaluator::pay_fee() { generic_evaluator::pay_fee(); }
+
+
+void_result transfer_from_confidential_evaluator::do_evaluate( const operation_type& op )
+{ try { return void_result(); } FC_CAPTURE_AND_RETHROW( (op) ) }
+
+
+void_result transfer_from_confidential_evaluator::do_apply( const operation_type& op )
+{ try {
+
+   const auto& ati = db().get_index_type<confidential_tx_index>();
+   const auto& ci = ati.indices().get<by_commitment>();
+   const auto& add = op.fee.asset_id(db()).dynamic_asset_data_id(db());  // verify fee is a legit asset
+
+   for (auto b : boost::combine(op.to, op.amount))
+   {
+       db().adjust_balance(boost::get<0>(b), boost::get<1>(b));
+       db().modify( add, [&]( asset_dynamic_data_object& obj )
+       {
+          obj.confidential_supply -= boost::get<1>(b).amount;
+          FC_ASSERT( obj.confidential_supply >= 0 );
+       });
+   }
+   db().adjust_balance(op.fee_payer(), op.fee.amount);
+   db().modify( add, [&]( asset_dynamic_data_object& obj )
+   {
+       obj.confidential_supply -= op.fee.amount;
+       FC_ASSERT( obj.confidential_supply >= 0 );
+   });
+
+   for(const auto& in : op.inputs)
+   {
+      auto itr = ci.find(in.commitment);
+      GRAPHENE_ASSERT( itr != ci.end(), blind_transfer_unknown_commitment, "", ("commitment", in.commitment) );
+      db().remove( *itr );
+   }
+   for(const auto& out : op.outputs)
+   {
+      db().create<confidential_tx_object>( [&]( confidential_tx_object& obj ){
+           obj.commitment = out.commitment;
+           obj.tx_key = out.tx_key;
+           obj.owner = out.owner;
+           obj.range_proof = out.range_proof;
+           obj.data = out.data;
+      });
+   }
+   return void_result();
+} FC_CAPTURE_AND_RETHROW( (op) ) }
+
+void transfer_from_confidential_evaluator::pay_fee()
+{
+      generic_evaluator::pay_fee();
+}
 } } // graphene::chain

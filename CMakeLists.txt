@@ -53,6 +53,20 @@ if( APPLE )
               "${HOMEBREW_PREFIX}/opt/qt5"
             )
     endif()
+
+    find_path(GMP_INCLUDE_DIRS NAMES gmp.h)
+    find_library(GMP_LIBRARY NAMES gmp libgmp)
+    include(FindPackageHandleStandardArgs)
+    find_package_handle_standard_args(GMP DEFAULT_MSG
+        GMP_INCLUDE_DIRS
+        GMP_LIBRARY)
+    mark_as_advanced(GMP_INCLUDE_DIRS GMP_LIBRARY)
+
+    add_library(gmp STATIC IMPORTED)
+    set_target_properties(gmp PROPERTIES
+        IMPORTED_LOCATION ${GMP_LIBRARY}
+        INTERFACE_INCLUDE_DIRECTORIES ${GMP_INCLUDE_DIRS}
+        )
 endif()
 
 if( APPLE )

@@ -138,7 +138,8 @@ namespace graphene { namespace chain {
       impl_miner_schedule_object_type,
       impl_budget_record_object_type,
       impl_transaction_detail_object_type,
-      impl_blinded_balance_object_type
+      impl_blinded_balance_object_type,
+      impl_confidential_tx_object_type
    };
 
    //typedef fc::unsigned_int            object_id_type;
