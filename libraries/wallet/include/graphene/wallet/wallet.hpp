@@ -1263,13 +1263,13 @@ namespace graphene { namespace wallet {
           *  Transfers a public balance from @from to one or more confidential balances using a
           *  confidential transfer.
           */
-         void transfer_to_confidential(string from_account_id_or_name,
+         signed_transaction transfer_to_confidential(string from_account_id_or_name,
                                string asset_symbol,
                                /** map from key or label to amount */
                                vector<pair<string, string> > to_addresses,
                                vector<string> to_amounts);
 
-         void transfer_from_confidential(const string &A, const string &B,
+         signed_transaction transfer_from_confidential(const string &A, const string &B,
                                   string asset_symbol,
                                   /** map from key or label to amount */
                                   vector<pair<string, string>> to_addresses,

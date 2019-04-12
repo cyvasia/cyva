@@ -3386,7 +3386,7 @@ public:
     *  Transfers a public balance from @from to one or more confidential balances using a
     *  confidential transfer.
     */
-   void wallet_api::transfer_to_confidential( string from_account_id_or_name,
+   signed_transaction wallet_api::transfer_to_confidential( string from_account_id_or_name,
                                       string asset_symbol,
                                       /** map from key or label to amount */
                                       vector<pair<string, string>> to_addresses,
@@ -3442,15 +3442,15 @@ public:
       trx.operations.push_back(op);
       my->set_operation_fees(trx, my->_remote_db->get_global_properties().parameters.current_fees);
       trx.validate();
-      sign_transaction(trx, true);
 
+      return sign_transaction(trx, true);
    } FC_CAPTURE_AND_RETHROW( (from_account_id_or_name)(asset_symbol)(to_amounts) ) }
 
    /**
     *  Transfers a public balance from @from to one or more confidential balances using a
     *  confidential transfer.
     */
-   void wallet_api::transfer_from_confidential( string const &A, string const &B,
+   signed_transaction wallet_api::transfer_from_confidential( string const &A, string const &B,
                                         string asset_symbol,
                                         /** map from key or label to amount */
                                         vector<pair<string, string>> to_addresses,
@@ -3589,8 +3589,7 @@ public:
       for (auto && sk : sks)
           trx.sign(sk, my->get_chain_properties().chain_id);
 
-      my->serve_cooked_transaction(trx);
-
+      return my->serve_cooked_transaction(trx);
        } FC_CAPTURE_AND_RETHROW( (A)(B)(asset_symbol)(to_amounts) ) }
 } } // graphene::wallet
 
