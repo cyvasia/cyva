@@ -3319,7 +3319,7 @@ public:
       return result;
    }
 
-   static auto build_confidential_tx = [](const string &A_, const string &B_, int64_t val, bool generate_range_proof)
+   static auto build_confidential_tx = [](const string &A_, const string &B_, asset val, bool generate_range_proof)
    {
        auto tx_key_s = fc::ecc::private_key::generate();
        auto tx_key_p = tx_key_s.get_public_key();
@@ -3335,11 +3335,13 @@ public:
        auto shared_secret = tx_key_s.get_shared_secret(B);
        auto blind_factor = fc::sha256::hash(shared_secret);
 
-       auto data = fc::aes_encrypt(shared_secret, fc::raw::pack(val));
-       auto commitment = fc::ecc::blind(blind_factor, val);
+       auto data = fc::aes_encrypt(shared_secret, fc::raw::pack(val.amount.value));
+       auto commitment_1 = fc::ecc::blind( blind_factor, val.amount.value);
+       auto commitment_2 = fc::ecc::blind2( blind_factor, val.asset_id.instance);
+       auto commitment = fc::ecc::commitment_sum( commitment_1, commitment_2);
        optional<vector<char>> commitment_range_proof;
        if(generate_range_proof)
-           commitment_range_proof = fc::ecc::range_proof_sign( 0, commitment, blind_factor, nonce,  0, 0, val);
+           commitment_range_proof = fc::ecc::range_proof_sign( 0, commitment, blind_factor, nonce,  0, 0, val.amount.value);
        return make_tuple(T_, P_, blind_factor, commitment, data, commitment_range_proof);
    };
 
@@ -3413,7 +3415,7 @@ public:
           auto to_amount = boost::get<1>(item);
           auto amount = asset_obj->amount_from_string(to_amount);
 
-          auto v = build_confidential_tx(std::get<0>(to_address), std::get<1>(to_address), amount.amount.value, (to_amounts.size() > 1));
+          auto v = build_confidential_tx(std::get<0>(to_address), std::get<1>(to_address), amount, (to_amounts.size() > 1));
 
           out.tx_key = std::get<0>(v);
           out.owner = std::get<1>(v);
@@ -3551,7 +3553,7 @@ public:
           auto amount = asset_obj->amount_from_string(to_amount);
           if(not to_address.second.empty())
           {
-              auto v = build_confidential_tx(to_address.first, to_address.second, amount.amount.value, ct_n > 1);
+              auto v = build_confidential_tx(to_address.first, to_address.second, amount, ct_n > 1);
               confidential_tx out;
               out.tx_key = std::get<0>(v);
               out.owner = std::get<1>(v);
