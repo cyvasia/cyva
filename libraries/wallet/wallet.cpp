@@ -3336,9 +3336,8 @@ public:
        auto blind_factor = fc::sha256::hash(shared_secret);
 
        auto data = fc::aes_encrypt(shared_secret, fc::raw::pack(val.amount.value));
-       auto commitment_1 = fc::ecc::blind( blind_factor, val.amount.value);
-       auto commitment_2 = fc::ecc::blind2( blind_factor, val.asset_id.instance);
-       auto commitment = fc::ecc::commitment_sum( commitment_1, commitment_2);
+       auto commitment = fc::ecc::blind( blind_factor, uint64_t(val.asset_id), val.amount.value);
+
        optional<vector<char>> commitment_range_proof;
        if(generate_range_proof)
            commitment_range_proof = fc::ecc::range_proof_sign( 0, commitment, blind_factor, nonce,  0, 0, val.amount.value);

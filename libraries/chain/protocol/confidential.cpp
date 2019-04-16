@@ -167,9 +167,7 @@ void transfer_to_confidential_operation::validate()const
    FC_ASSERT( std::is_sorted(outputs.begin(), outputs.end(), [](const confidential_tx &a, const confidential_tx &b){ return a.commitment < b.commitment; }),
               "all outputs must be sorted by commitment id" );
 
-   auto in_commit_1 = fc::ecc::blind( blinding_factor, amount.amount.value);
-   auto in_commit_2 = fc::ecc::blind2( blinding_factor, amount.asset_id.instance);
-   auto in_commit = fc::ecc::commitment_sum( in_commit_1, in_commit_2);
+   auto in_commit = fc::ecc::blind(blinding_factor, uint64_t(amount.asset_id), amount.amount.value);
 
    vector<commitment_type> out_commits(outputs.size());
    std::transform(outputs.begin(), outputs.end(), out_commits.begin(), [](const confidential_tx & a){ return a.commitment; });
@@ -211,9 +209,7 @@ void transfer_from_confidential_operation::validate()const
 
    asset                 public_volume = fee;
    public_volume = std::accumulate(amount.begin(), amount.end(), public_volume);
-   auto out_commit_1 = fc::ecc::blind(blinding_factor, public_volume.amount.value);
-   auto out_commit_2 = fc::ecc::blind2(blinding_factor, public_volume.asset_id.instance);
-   auto out_commit = fc::ecc::commitment_sum( out_commit_1, out_commit_2);
+   auto pub_commit = fc::ecc::blind(blinding_factor, uint64_t(public_volume.asset_id), public_volume.amount.value);
 
    std::transform(inputs.begin(), inputs.end(), in_commits.begin(), [](const confidential_tx & a){ return a.commitment; });
    std::transform(outputs.begin(), outputs.end(), out_commits.begin(), [](const confidential_tx & a){ return a.commitment; });
@@ -232,7 +228,7 @@ void transfer_from_confidential_operation::validate()const
        }
    }
 
-   out_commits.push_back(out_commit);
+   out_commits.push_back(pub_commit);
 
    FC_ASSERT( fc::ecc::verify_sum(in_commits, out_commits, 0), "imbalance");
 
