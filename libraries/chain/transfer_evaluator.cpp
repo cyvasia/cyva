@@ -164,7 +164,6 @@ void_result transfer_evaluator::do_apply( const transfer_operation& o )
 
    db().adjust_balance( o.from, -o.amount );
    db().adjust_balance( to_account.get_id(), o.amount );
-
    db().create<transaction_detail_object>([&o, &d, &to_account](transaction_detail_object& obj)
                                           {
                                              obj.m_operation_type = (uint8_t)transaction_detail_object::transfer;
@@ -176,6 +175,7 @@ void_result transfer_evaluator::do_apply( const transfer_operation& o )
                                              obj.m_transaction_encrypted_memo = o.memo;
                                              obj.m_str_description = "transfer";
                                              obj.m_timestamp = d.head_block_time();
+                                             obj.m_block_number = d.head_block_num();
                                           });
    return void_result();
 } FC_CAPTURE_AND_RETHROW( (o) ) }

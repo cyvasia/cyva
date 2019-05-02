@@ -33,6 +33,7 @@ namespace graphene { namespace chain {
       std::string m_str_description;
       optional<memo_data> m_transaction_encrypted_memo;
       fc::time_point_sec m_timestamp;
+      uint32_t m_block_number;
 
       share_type get_transaction_amount() const;
       share_type get_transaction_fee() const;
@@ -46,6 +47,7 @@ namespace graphene { namespace chain {
    struct by_transaction_fee;
    struct by_description;
    struct by_time;
+   struct by_block_number;
 
    template <typename TAG, typename _t_object>
    struct key_extractor;
@@ -124,11 +126,12 @@ namespace graphene { namespace chain {
          ordered_non_unique< tag<by_transaction_amount>, const_mem_fun<transaction_detail_object, share_type, &transaction_detail_object::get_transaction_amount> >,
          ordered_non_unique< tag<by_transaction_fee>, const_mem_fun<transaction_detail_object, share_type, &transaction_detail_object::get_transaction_fee> >,
          ordered_non_unique< tag<by_description>, member<transaction_detail_object, std::string, &transaction_detail_object::m_str_description> >,
-         ordered_non_unique< tag<by_time>, member<transaction_detail_object, fc::time_point_sec, &transaction_detail_object::m_timestamp> >
+         ordered_non_unique< tag<by_time>, member<transaction_detail_object, fc::time_point_sec, &transaction_detail_object::m_timestamp> >,
+         ordered_non_unique< tag<by_block_number>, member<transaction_detail_object, uint32_t, &transaction_detail_object::m_block_number> >
       >
    > transaction_detail_multi_index_type;
 
    typedef generic_index<transaction_detail_object, transaction_detail_multi_index_type> transaction_detail_index;
 } }
 
-FC_REFLECT_DERIVED( graphene::chain::transaction_detail_object, (graphene::db::object), (m_from_account)(m_to_account)(m_from_name)(m_to_name)(m_operation_type)(m_transaction_amount)(m_transaction_fee)(m_str_description)(m_transaction_encrypted_memo)(m_timestamp) )
+FC_REFLECT_DERIVED( graphene::chain::transaction_detail_object, (graphene::db::object), (m_from_account)(m_to_account)(m_from_name)(m_to_name)(m_operation_type)(m_transaction_amount)(m_transaction_fee)(m_str_description)(m_transaction_encrypted_memo)(m_timestamp)(m_block_number) )
