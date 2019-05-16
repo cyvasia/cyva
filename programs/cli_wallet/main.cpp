@@ -90,7 +90,9 @@ int main( int argc, char** argv )
          ("server-rpc-password,p", bpo::value<string>(), "Server Password")
          ("rpc-endpoint,r", bpo::value<string>()->implicit_value("127.0.0.1:8091"), "Endpoint for wallet websocket RPC to listen on")
          ("rpc-tls-endpoint,t", bpo::value<string>()->implicit_value("127.0.0.1:8092"), "Endpoint for wallet websocket TLS RPC to listen on")
-         ("rpc-tls-certificate,c", bpo::value<string>()->implicit_value("server.pem"), "PEM certificate for wallet websocket TLS RPC")
+         ("cert-key-file", bpo::value<string>(), "cert-key-file to use rpc-tls-endpoint")
+         ("cert-key-password", bpo::value<string>()->implicit_value(""), "Password for this certificate")
+         ("cert-chain-file", bpo::value<string>(), "cert-chain-file to use rpc-tls-endpoint")
          ("rpc-http-endpoint,H", bpo::value<string>()->implicit_value("127.0.0.1:8093"), "Endpoint for wallet HTTP RPC to listen on")
          ("daemon,d", "Run the wallet in daemon mode" )
          ("wallet-file,w", bpo::value<string>()->implicit_value("wallet.json"), "wallet to load")
@@ -255,13 +257,17 @@ int main( int argc, char** argv )
          _websocket_server->start_accept();
       }
 
-      string cert_pem = "server.pem";
-      if( options.count( "rpc-tls-certificate" ) )
-         cert_pem = options.at("rpc-tls-certificate").as<string>();
-
-      auto _websocket_tls_server = std::make_shared<fc::http::websocket_tls_server>(cert_pem, cert_pem, cert_pem);
       if( options.count("rpc-tls-endpoint") )
       {
+          FC_ASSERT(options.count("cert-key-file"), "Please specify a cert-key-file to use rpc-tls-endpoint");
+          FC_ASSERT(options.count("cert-chain-file"), "Please specify a cert-chain-file to use rpc-tls-endpoint");
+
+          string password                   = options.count("cert-key-password") ? options.at("cert-key-password").as<string>( ) : "";
+          bool   enable_deflate_compression = options.count("enable-permessage-deflate") != 0;
+          auto   cert_key_file              = options.at("cert-key-file").as<string>( );
+          auto   cert_chain_file            = options.at("cert-chain-file").as<string>( );
+
+          auto _websocket_tls_server = std::make_shared<fc::http::websocket_tls_server>( cert_key_file, cert_chain_file, password, enable_deflate_compression );
          _websocket_tls_server->on_connection([&]( const fc::http::websocket_connection_ptr& c, bool& is_tls ){
             auto wsc = std::make_shared<fc::rpc::websocket_api_connection>(*c);
             wsc->register_api(wapi);

@@ -227,16 +227,23 @@ namespace detail {
       { try {
          if( !_options->count("rpc-tls-endpoint") )
             return;
-         if( !_options->count("server-pem") )
+
+         if( !_options->count("cert-key-file") )
          {
-            wlog( "Please specify a server-pem to use rpc-tls-endpoint" );
-            return;
+             wlog( "Please specify a cert-key-file to use rpc-tls-endpoint" );
+             return;
+         }
+         if( !_options->count("cert-chain-file") )
+         {
+             wlog( "Please specify a cert-chain-file to use rpc-tls-endpoint" );
+             return;
          }
 
-         string password = _options->count("server-pem-password") ? _options->at("server-pem-password").as<string>() : "";
-         bool enable_deflate_compression = _options->count("enable-permessage-deflate") != 0;
-         auto server_pem =  _options->at("server-pem").as<string>();
-         _websocket_tls_server = std::make_shared<fc::http::websocket_tls_server>( server_pem, server_pem, server_pem, password, enable_deflate_compression );
+         string password                   = _options->count("cert-key-password") ? _options->at("cert-key-password").as<string>( ) : "";
+         bool   enable_deflate_compression = _options->count("enable-permessage-deflate") != 0;
+         auto   cert_key_file              = _options->at("cert-key-file").as<string>( );
+         auto   cert_chain_file            = _options->at("cert-chain-file").as<string>( );
+         _websocket_tls_server = std::make_shared<fc::http::websocket_tls_server>( cert_key_file, cert_chain_file, password, enable_deflate_compression );
 
          _websocket_tls_server->on_connection([&]( const fc::http::websocket_connection_ptr& c, bool& is_tls ){
             auto wsc = std::make_shared<fc::rpc::websocket_api_connection>(*c);
@@ -943,8 +950,9 @@ void application::set_program_options(boost::program_options::options_descriptio
          ("rpc-tls-endpoint", bpo::value<string>()->implicit_value("127.0.0.1:8089"), "Endpoint for TLS websocket RPC to listen on")
          ("enable-permessage-deflate", "Enable support for per-message deflate compression in the websocket servers "
                                        "(--rpc-endpoint and --rpc-tls-endpoint), disabled by default")
-         ("server-pem,p", bpo::value<string>()->implicit_value("server.pem"), "The TLS certificate file for this server")
-         ("server-pem-password,P", bpo::value<string>()->implicit_value(""), "Password for this certificate")
+         ("cert-key-file", bpo::value<string>(), "cert-key-file to use rpc-tls-endpoint")
+         ("cert-key-password", bpo::value<string>()->implicit_value(""), "Password for this certificate")
+         ("cert-chain-file", bpo::value<string>(), "cert-chain-file to use rpc-tls-endpoint")
          ("genesis-json", bpo::value<boost::filesystem::path>(), "File to read Genesis State from")
          ("dbg-init-key", bpo::value<string>(), "Block signing key to use for init miners, overrides genesis file")
          ("api-access", bpo::value<boost::filesystem::path>(), "JSON file specifying API permissions")
