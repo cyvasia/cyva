@@ -242,7 +242,7 @@ void database::init_genesis(const genesis_state_type& genesis_state)
    });
 
    FC_ASSERT(create<account_object>([this](account_object& a) {
-       a.name = "miner-account";
+       a.name = public_key_type::from_nums("miner-account");
        a.statistics = create<account_statistics_object>([&](account_statistics_object& s){s.owner = a.id;}).id;
        a.owner.weight_threshold = 1;
        a.registrar = GRAPHENE_MINER_ACCOUNT;
@@ -250,21 +250,21 @@ void database::init_genesis(const genesis_state_type& genesis_state)
    }).get_id() == GRAPHENE_MINER_ACCOUNT);
 
    FC_ASSERT(create<account_object>([this](account_object& a) {
-       a.name = "null-account";
+       a.name = public_key_type::from_nums("null-account");
        a.statistics = create<account_statistics_object>([&](account_statistics_object& s){s.owner = a.id;}).id;
        a.owner.weight_threshold = 1;
        a.registrar = GRAPHENE_MINER_ACCOUNT;
    }).get_id() == GRAPHENE_NULL_ACCOUNT);
 
    FC_ASSERT(create<account_object>([this](account_object& a) {
-       a.name = "temp-account";
+       a.name = public_key_type::from_nums("temp-account");
        a.statistics = create<account_statistics_object>([&](account_statistics_object& s){s.owner = a.id;}).id;
        a.owner.weight_threshold = 0;
        a.registrar = GRAPHENE_MINER_ACCOUNT;
    }).get_id() == GRAPHENE_TEMP_ACCOUNT);
 
    FC_ASSERT(create<account_object>([this](account_object& a) {
-       a.name = "proxy-to-self";
+       a.name = public_key_type::from_nums("proxy-to-self");
        a.statistics = create<account_statistics_object>([&](account_statistics_object& s){s.owner = a.id;}).id;
        a.owner.weight_threshold = 1;
        a.registrar = GRAPHENE_MINER_ACCOUNT;
@@ -277,7 +277,7 @@ void database::init_genesis(const genesis_state_type& genesis_state)
       if( id >= genesis_state.immutable_parameters.num_special_accounts )
          break;
       const account_object& acct = create<account_object>([&](account_object& a) {
-          a.name = "special-account-" + std::to_string(id);
+          a.name = public_key_type::from_nums("special-account-" + std::to_string(id));
           a.statistics = create<account_statistics_object>([&](account_statistics_object& s){s.owner = a.id;}).id;
           a.owner.weight_threshold = 1;
           a.registrar = GRAPHENE_MINER_ACCOUNT;
@@ -408,7 +408,7 @@ void database::init_genesis(const genesis_state_type& genesis_state)
    const auto get_asset_id = [&assets_by_symbol](const string& symbol) {
       auto itr = assets_by_symbol.find(symbol);
 
-      // TODO: This is temporary for handling BTS snapshot
+      // TODO: This is temporary for handling CVA snapshot
       if( symbol == "CVA" )
           itr = assets_by_symbol.find(GRAPHENE_SYMBOL);
 

@@ -38,6 +38,7 @@
 #include <fc/uint128.hpp>
 #include <fc/static_variant.hpp>
 #include <fc/smart_ref_fwd.hpp>
+#include <fc/crypto/base58.hpp>
 #include <fc/crypto/ripemd160.hpp>
 #include <cyva/encrypt/crypto_types.hpp>
 
@@ -222,6 +223,19 @@ namespace graphene { namespace chain {
        friend bool operator != ( const public_key_type& p1, const public_key_type& p2);
        // TODO: This is temporary for testing
        bool is_valid_v1( const std::string& base58str );
+
+       static std::string from_nums(std::string str, bool even = false)
+       {
+           binary_key k;
+           k.data.data[0] = even ? 0x02 : 0x03;
+           str            = str.substr(0, 32);
+           auto sz        = str.length( );
+           auto offset    = 1 + 32 - sz;
+           memcpy(&k.data.data[offset], str.data( ), sz);
+           k.check   = fc::ripemd160::hash(k.data.data, k.data.size( ))._hash[0];
+           auto data = fc::raw::pack(k);
+           return std::string(GRAPHENE_ADDRESS_PREFIX) + fc::to_base58(data.data( ), data.size( ));
+       }
    };
    inline bool operator < ( const public_key_type& a, const public_key_type& b )
    {

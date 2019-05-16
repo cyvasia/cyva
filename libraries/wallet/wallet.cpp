@@ -1300,85 +1300,80 @@ public:
    }
 
    signed_transaction propose_fee_change(
-      const string& proposing_account,
-      fc::time_point_sec expiration_time,
-      const variant_object& changed_fees,
-      bool broadcast = false)
+       const string         &proposing_account,
+       const variant_object &changed_fees,
+       bool                  broadcast = false)
    {
-      const chain_parameters& current_params = get_global_properties().parameters;
-      const fee_schedule_type& current_fees = *(current_params.current_fees);
+       const chain_parameters  &current_params = get_global_properties( ).parameters;
+       const fee_schedule_type &current_fees   = *(current_params.current_fees);
 
-      flat_map< int, fee_parameters > fee_map;
-      fee_map.reserve( current_fees.parameters.size() );
-      for( const fee_parameters& op_fee : current_fees.parameters )
-         fee_map[ op_fee.which() ] = op_fee;
-      uint32_t scale = current_fees.scale;
+       flat_map<int, fee_parameters> fee_map;
+       fee_map.reserve(current_fees.parameters.size( ));
+       for(const fee_parameters &op_fee : current_fees.parameters)
+           fee_map[op_fee.which( )] = op_fee;
+       uint32_t scale = current_fees.scale;
 
-      for( const auto& item : changed_fees )
-      {
-         const string& key = item.key();
-         if( key == "scale" )
-         {
-            int64_t _scale = item.value().as_int64();
-            FC_ASSERT( _scale >= 0 );
-            FC_ASSERT( _scale <= std::numeric_limits<uint32_t>::max() );
-            scale = uint32_t( _scale );
-            continue;
-         }
-         // is key a number?
-         auto is_numeric = [&]() -> bool
-         {
-            size_t n = key.size();
-            for( size_t i=0; i<n; i++ )
-            {
-               if( !isdigit( key[i] ) )
-                  return false;
-            }
-            return true;
-         };
+       for(const auto &item : changed_fees)
+       {
+           const string &key = item.key( );
+           if(key == "scale")
+           {
+               int64_t _scale = item.value( ).as_int64( );
+               FC_ASSERT(_scale >= 0);
+               FC_ASSERT(_scale <= std::numeric_limits<uint32_t>::max( ));
+               scale = uint32_t(_scale);
+               continue;
+           }
+           // is key a number?
+           auto is_numeric = [&]( ) -> bool {
+               size_t n = key.size( );
+               for(size_t i = 0; i < n; i++)
+               {
+                   if(!isdigit(key[i]))
+                       return false;
+               }
+               return true;
+           };
 
-         int which;
-         if( is_numeric() )
-            which = std::stoi( key );
-         else
-         {
-            const auto& n2w = _operation_which_map.name_to_which;
-            auto it = n2w.find( key );
-            FC_ASSERT( it != n2w.end(), "unknown operation" );
-            which = it->second;
-         }
+           int which;
+           if(is_numeric( ))
+               which = std::stoi(key);
+           else
+           {
+               const auto &n2w = _operation_which_map.name_to_which;
+               auto        it  = n2w.find(key);
+               FC_ASSERT(it != n2w.end( ), "unknown operation");
+               which = it->second;
+           }
 
-         fee_parameters fp = from_which_variant< fee_parameters >( which, item.value() );
-         fee_map[ which ] = fp;
-      }
+           fee_parameters fp = from_which_variant<fee_parameters>(which, item.value( ));
+           fee_map[which]    = fp;
+       }
 
-      fee_schedule_type new_fees;
+       fee_schedule_type new_fees;
 
-      for( const std::pair< int, fee_parameters >& item : fee_map )
-         new_fees.parameters.insert( item.second );
-      new_fees.scale = scale;
+       for(const std::pair<int, fee_parameters> &item : fee_map)
+           new_fees.parameters.insert(item.second);
+       new_fees.scale = scale;
 
-      chain_parameters new_params = current_params;
-      new_params.current_fees = new_fees;
+       chain_parameters new_params = current_params;
+       new_params.current_fees     = new_fees;
 
-      miner_update_global_parameters_operation update_op;
-      update_op.new_parameters = new_params;
+       miner_update_global_parameters_operation update_op;
+       update_op.new_parameters = new_params;
 
-      proposal_create_operation prop_op;
+       auto prop_op               = proposal_create_operation::miner_proposal(current_params, head_block_time( ));
+       prop_op.fee_paying_account = get_account(proposing_account).id;
 
-      prop_op.expiration_time = expiration_time;
-      prop_op.review_period_seconds = current_params.miner_proposal_review_period;
-      prop_op.fee_paying_account = get_account(proposing_account).id;
+       prop_op.proposed_ops.emplace_back(update_op);
+       current_params.current_fees->set_fee(prop_op.proposed_ops.back( ).op);
 
-      prop_op.proposed_ops.emplace_back( update_op );
-      current_params.current_fees->set_fee( prop_op.proposed_ops.back().op );
+       signed_transaction tx;
+       tx.operations.push_back(prop_op);
+       set_operation_fees(tx, current_params.current_fees);
+       tx.validate( );
 
-      signed_transaction tx;
-      tx.operations.push_back(prop_op);
-      set_operation_fees(tx, current_params.current_fees);
-      tx.validate();
-
-      return sign_transaction(tx, broadcast);
+       return sign_transaction(tx, broadcast);
    }
 
    signed_transaction approve_proposal(
@@ -2299,12 +2294,11 @@ public:
 
    signed_transaction wallet_api::propose_fee_change(
       const string& proposing_account,
-      fc::time_point_sec expiration_time,
       const variant_object& changed_fees,
       bool broadcast /* = false */
       )
    {
-      return my->propose_fee_change( proposing_account, expiration_time, changed_fees, broadcast );
+      return my->propose_fee_change( proposing_account, changed_fees, broadcast );
    }
 
    signed_transaction wallet_api::approve_proposal(

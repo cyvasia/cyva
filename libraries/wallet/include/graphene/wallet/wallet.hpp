@@ -1038,11 +1038,9 @@ namespace graphene { namespace wallet {
           * @return the signed version of the transaction
           * @ingroup WalletCLI
           */
-         signed_transaction propose_fee_change(
-            const string& proposing_account,
-            fc::time_point_sec expiration_time,
-            const variant_object& changed_values,
-            bool broadcast = false);
+          signed_transaction propose_fee_change(const string         &proposing_account,
+                                                const variant_object &changed_values,
+                                                bool                  broadcast = false);
 
          /**
           * @brief Approve or disapprove a proposal.
