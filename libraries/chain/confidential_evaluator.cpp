@@ -184,13 +184,16 @@ void_result transfer_to_confidential_evaluator::do_apply( const operation_type& 
    });
    for( const auto& out : op.outputs )
    {
-      db().create<confidential_tx_object>( [&]( confidential_tx_object& obj ){
-           obj.commitment = out.commitment;
-           obj.tx_key = out.tx_key;
-           obj.owner = out.owner;
-           obj.range_proof = out.range_proof;
-           obj.data = out.data;
-      });
+       db( ).create<confidential_tx_object>([&](confidential_tx_object &obj) {
+           obj.commitment   = out.commitment;
+           obj.tx_key       = out.tx_key;
+           obj.owner        = out.owner;
+           obj.range_proof  = out.range_proof;
+           obj.data         = out.data;
+           obj.valid        = true;
+           obj.timestamp    = db( ).head_block_time( );
+           obj.block_number = db( ).head_block_num( );
+       });
    }
    return void_result();
 } FC_CAPTURE_AND_RETHROW( (op) ) }
@@ -229,17 +232,23 @@ void_result transfer_from_confidential_evaluator::do_apply( const operation_type
    {
       auto itr = ci.find(in.commitment);
       GRAPHENE_ASSERT( itr != ci.end(), blind_transfer_unknown_commitment, "", ("commitment", in.commitment) );
-      db().remove( *itr );
+      db().modify( *itr, [&]( confidential_tx_object& obj ){
+          obj.valid = false;
+          obj.range_proof.reset();
+      });
    }
    for(const auto& out : op.outputs)
    {
-      db().create<confidential_tx_object>( [&]( confidential_tx_object& obj ){
-           obj.commitment = out.commitment;
-           obj.tx_key = out.tx_key;
-           obj.owner = out.owner;
-           obj.range_proof = out.range_proof;
-           obj.data = out.data;
-      });
+       db( ).create<confidential_tx_object>([&](confidential_tx_object &obj) {
+           obj.commitment   = out.commitment;
+           obj.tx_key       = out.tx_key;
+           obj.owner        = out.owner;
+           obj.range_proof  = out.range_proof;
+           obj.data         = out.data;
+           obj.valid        = true;
+           obj.timestamp    = db( ).head_block_time( );
+           obj.block_number = db( ).head_block_num( );
+       });
    }
    return void_result();
 } FC_CAPTURE_AND_RETHROW( (op) ) }
