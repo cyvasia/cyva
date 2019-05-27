@@ -37,8 +37,6 @@ void_result transfer_to_blind_evaluator::do_evaluate( const transfer_to_blind_op
 { try {
    const auto& d = db();
 
-   const auto& atype = o.amount.asset_id(db());
-
    for( const auto& out : o.outputs )
    {
       for( const auto& a : out.owner.account_auths )

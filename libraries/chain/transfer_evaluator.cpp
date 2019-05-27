@@ -125,11 +125,8 @@ void_result transfer_evaluator::do_apply( const transfer_operation& o )
 
        // copied from do_apply
 
-       const auto& new_acnt_object = db().create<account_object>( [&]( account_object& obj ){
+       db().create<account_object>( [&]( account_object& obj ){
              obj.registrar = o.from;
-
-             auto& params = db().get_global_properties().parameters;
-
              obj.name             = to_name;
              obj.owner            = authority(1, o.to, 1);
              obj.statistics = db().create<account_statistics_object>([&](account_statistics_object& s){s.owner = obj.id;}).id;
