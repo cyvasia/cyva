@@ -28,7 +28,7 @@
 #include <graphene/chain/confidential_object.hpp>
 #include <graphene/chain/database.hpp>
 #include <graphene/chain/hardfork.hpp>
-
+#include <graphene/chain/transaction_detail_object.hpp>
 #include <boost/range/combine.hpp>
 
 namespace graphene { namespace chain {
@@ -194,6 +194,19 @@ void_result transfer_to_confidential_evaluator::do_apply( const operation_type& 
            obj.block_number = db( ).head_block_num( );
        });
    }
+
+   db().create<transaction_detail_object>([&](transaction_detail_object& obj)
+                                          {
+                                              obj.m_operation_type = (uint8_t)transaction_detail_object::transfer;
+
+                                              obj.m_from_account = op.from;
+                                              obj.m_to_account = GRAPHENE_NULL_ACCOUNT;
+                                              obj.m_transaction_amount = op.amount;
+                                              obj.m_transaction_fee = op.fee;
+                                              obj.m_str_description = "confidential transfer";
+                                              obj.m_timestamp = db().head_block_time();
+                                              obj.m_block_number = db().head_block_num();
+                                          });
    return void_result();
 } FC_CAPTURE_AND_RETHROW( (op) ) }
 
@@ -226,6 +239,19 @@ void_result transfer_from_confidential_evaluator::do_apply( const operation_type
           obj.confidential_supply -= boost::get<1>(b).amount;
           FC_ASSERT( obj.confidential_supply >= 0 );
        });
+       db().create<transaction_detail_object>([&](transaction_detail_object& obj)
+                                              {
+                                                  obj.m_operation_type = (uint8_t)transaction_detail_object::transfer;
+
+                                                  obj.m_from_account = GRAPHENE_NULL_ACCOUNT;
+                                                  obj.m_to_account = itr_name->get_id();
+                                                  obj.m_transaction_amount = boost::get<1>(b);
+                                                  obj.m_transaction_fee = asset(0, op.fee.asset_id);
+                                                  obj.m_str_description = "confidential transfer";
+                                                  obj.m_timestamp = db().head_block_time();
+                                                  obj.m_block_number = db().head_block_num();
+                                              });
+
    }
    db().adjust_balance(op.fee_payer(), op.fee.amount);
    db().modify( add, [&]( asset_dynamic_data_object& obj )
