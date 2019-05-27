@@ -207,8 +207,8 @@ void_result transfer_from_confidential_evaluator::do_evaluate( const operation_t
 void_result transfer_from_confidential_evaluator::do_apply( const operation_type& op )
 { try {
 
-   const auto& ati = db().get_index_type<confidential_tx_index>();
-   const auto& ci = ati.indices().get<by_commitment>();
+   const auto& cti = db().get_index_type<confidential_tx_index>();
+   const auto& ci = cti.indices().get<by_commitment>();
    const auto& add = op.fee.asset_id(db()).dynamic_asset_data_id(db());  // verify fee is a legit asset
    const auto& ai = db().get_index_type<account_index>().indices().get<by_name>();
 
@@ -238,6 +238,8 @@ void_result transfer_from_confidential_evaluator::do_apply( const operation_type
    {
       auto itr = ci.find(in.commitment);
       GRAPHENE_ASSERT( itr != ci.end(), blind_transfer_unknown_commitment, "", ("commitment", in.commitment) );
+      FC_ASSERT(itr->unspent, "already spent commitment", ("commitment", in.commitment));
+
       db().modify( *itr, [&]( confidential_tx_object& obj ){
           obj.unspent = false;
           obj.range_proof.reset();
