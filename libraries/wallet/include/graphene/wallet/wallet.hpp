@@ -1275,7 +1275,7 @@ namespace graphene { namespace wallet {
                                   vector<pair<string, string>> to_addresses,
                                   vector<string> to_amounts);
 
-         vector<confidential_tx_object> get_confidential_transactions(const string &a, const string &B )const;
+         vector<confidential_tx_object> get_confidential_transactions(const string &a, const string &B , bool unspent)const;
          asset get_confidential_balance(const string &A, const string &B, string asset_symbol) const;
       };
 

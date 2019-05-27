@@ -3343,12 +3343,12 @@ public:
        return make_tuple(T_, P_, blind_factor, commitment, data, commitment_range_proof, tx_key_s);
    };
 
-   vector<confidential_tx_object> wallet_api::get_confidential_transactions(const string &A, const string &B) const
+   vector<confidential_tx_object> wallet_api::get_confidential_transactions(const string &A, const string &B, bool unspent) const
    {
        FC_ASSERT( !is_locked() );
        auto Ap = public_key_type(A);
        auto As = my->_keys[Ap];
-       return my->_remote_db->get_confidential_transactions(As, B);
+       return my->_remote_db->get_confidential_transactions(As, B, unspent);
    }
 
    asset wallet_api::get_confidential_balance(const string &A, const string &B, string asset_symbol) const
@@ -3365,7 +3365,7 @@ public:
        auto owner_private_a = *wif_to_key(As);
        auto owner_private_b = *wif_to_key(Bs);
 
-       auto _atxs =  my->_remote_db->get_confidential_transactions(As, B);
+       auto _atxs =  my->_remote_db->get_confidential_transactions(As, B, true);
 
        asset total_amount = asset_obj->amount(0);
        for( auto && tx : _atxs)
@@ -3491,7 +3491,7 @@ public:
                total_amount_out += amount;
            }
 
-           auto _atxs = get_confidential_transactions(A, B);
+           auto _atxs = get_confidential_transactions(A, B, true);
            FC_ASSERT(_atxs.size( ) > 0, "No confidential transactions for ${A} ${B}", ("A", A)("B", B));
 
            for(auto &&tx : _atxs)
