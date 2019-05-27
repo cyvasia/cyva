@@ -190,7 +190,7 @@ void_result transfer_to_confidential_evaluator::do_apply( const operation_type& 
            obj.owner        = out.owner;
            obj.range_proof  = out.range_proof;
            obj.data         = out.data;
-           obj.valid        = true;
+           obj.unspent      = true;
            obj.timestamp    = db( ).head_block_time( );
            obj.block_number = db( ).head_block_num( );
        });
@@ -233,7 +233,7 @@ void_result transfer_from_confidential_evaluator::do_apply( const operation_type
       auto itr = ci.find(in.commitment);
       GRAPHENE_ASSERT( itr != ci.end(), blind_transfer_unknown_commitment, "", ("commitment", in.commitment) );
       db().modify( *itr, [&]( confidential_tx_object& obj ){
-          obj.valid = false;
+          obj.unspent = false;
           obj.range_proof.reset();
       });
    }
@@ -245,7 +245,7 @@ void_result transfer_from_confidential_evaluator::do_apply( const operation_type
            obj.owner        = out.owner;
            obj.range_proof  = out.range_proof;
            obj.data         = out.data;
-           obj.valid        = true;
+           obj.unspent      = true;
            obj.timestamp    = db( ).head_block_time( );
            obj.block_number = db( ).head_block_num( );
        });

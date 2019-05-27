@@ -1543,7 +1543,7 @@ namespace graphene { namespace app {
    {
       vector<confidential_tx_object> result;
       const auto& bal_idx = _db.get_index_type<confidential_tx_index>();
-      const auto& trxs = bal_idx.indices().get<by_validity>();
+      const auto& trxs = bal_idx.indices().get<by_unspent>();
 
       std::copy_if(trxs.lower_bound(unspent), trxs.end(), std::back_inserter(result), [&](confidential_tx_object const & t)
       {

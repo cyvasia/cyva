@@ -92,13 +92,13 @@ class confidential_tx_object : public graphene::db::abstract_object<confidential
     public_key_type            owner;
     vector<char>               data;
     optional<range_proof_type> range_proof; ///< only required if there is more than one blind output
-    bool                       valid;
+    bool                       unspent;
     fc::time_point_sec         timestamp;
     uint32_t                   block_number;
 };
 
 struct by_tx;
-struct by_validity;
+struct by_unspent;
 struct by_time;
 struct by_block_number;
 
@@ -111,7 +111,7 @@ typedef multi_index_container<
         ordered_unique<tag<by_id>, member<object, object_id_type, &object::id>>,
         ordered_unique<tag<by_commitment>, member<confidential_tx_object, commitment_type, &confidential_tx_object::commitment>>,
         ordered_unique<tag<by_tx>, member<confidential_tx_object, public_key_type, &confidential_tx_object::tx_key>>,
-        ordered_non_unique<tag<by_validity>, member<confidential_tx_object, bool, &confidential_tx_object::valid>>,
+        ordered_non_unique<tag<by_unspent>, member<confidential_tx_object, bool, &confidential_tx_object::unspent>>,
         ordered_non_unique<tag<by_time>, member<confidential_tx_object, fc::time_point_sec, &confidential_tx_object::timestamp>>,
         ordered_non_unique<tag<by_block_number>, member<confidential_tx_object, uint32_t, &confidential_tx_object::block_number>>>>
     confidential_tx_object_multi_index_type;
@@ -120,4 +120,4 @@ typedef generic_index<confidential_tx_object, confidential_tx_object_multi_index
 
 } } // graphene::chain
 
-FC_REFLECT_DERIVED( graphene::chain::confidential_tx_object, (graphene::db::object), (commitment)(tx_key)(owner)(data)(range_proof)(valid)(timestamp)(block_number) )
+FC_REFLECT_DERIVED( graphene::chain::confidential_tx_object, (graphene::db::object), (commitment)(tx_key)(owner)(data)(range_proof)(unspent)(timestamp)(block_number) )

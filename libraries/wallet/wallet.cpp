@@ -3496,7 +3496,7 @@ public:
 
            for(auto &&tx : _atxs)
            {
-               if(not tx.valid)
+               if(not tx.unspent)
                    continue;
 
                confidential_tx in;
