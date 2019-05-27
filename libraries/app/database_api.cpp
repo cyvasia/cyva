@@ -1409,7 +1409,6 @@ namespace graphene { namespace app {
       
       vector< fc::variant > result;
       result.reserve(ops.size());
-      const asset_object& a = id(_db);
       get_required_fees_helper helper(
                                       _db.current_fee_schedule(),
                                       GET_REQUIRED_FEES_MAX_RECURSION );
@@ -1468,7 +1467,6 @@ namespace graphene { namespace app {
 
       auto itr = idx.begin();
   
-      int64_t time_to_maint = -1;
       fc::time_point_sec next_time = (fc::time_point_sec)0;
       fc::time_point_sec prev_time = (fc::time_point_sec)0;
 
