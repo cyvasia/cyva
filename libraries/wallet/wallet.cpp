@@ -3568,7 +3568,7 @@ public:
                }
                else
                {
-                   op.to.push_back(get_account_id(to_address.first));
+                   op.to.push_back(public_key_type(to_address.first));
                    op.amount.push_back(amount);
                }
            }

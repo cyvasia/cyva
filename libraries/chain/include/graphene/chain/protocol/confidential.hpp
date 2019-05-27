@@ -305,7 +305,7 @@ struct transfer_from_confidential_operation : public base_operation
    asset                     fee;
    vector<confidential_tx>   inputs;
 
-   vector<account_id_type>   to;
+   vector<public_key_type>   to;
    vector<asset>             amount;
    blind_factor_type         blinding_factor;
 

@@ -21,6 +21,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+#include <graphene/chain/account_object.hpp>
 #include <graphene/chain/exceptions.hpp>
 #include <graphene/chain/protocol/confidential.hpp>
 #include <graphene/chain/confidential_evaluator.hpp>
@@ -211,10 +212,17 @@ void_result transfer_from_confidential_evaluator::do_apply( const operation_type
    const auto& ati = db().get_index_type<confidential_tx_index>();
    const auto& ci = ati.indices().get<by_commitment>();
    const auto& add = op.fee.asset_id(db()).dynamic_asset_data_id(db());  // verify fee is a legit asset
+   const auto& ai = db().get_index_type<account_index>().indices().get<by_name>();
 
    for (auto b : boost::combine(op.to, op.amount))
    {
-       db().adjust_balance(boost::get<0>(b), boost::get<1>(b));
+       auto to = boost::get<0>(b);
+       std::string to_name(to);
+
+       auto itr_name = ai.find(to_name);
+       FC_ASSERT(itr_name != ai.end(), "address not found", ("address", *itr_name));
+
+       db().adjust_balance(itr_name->get_id(), boost::get<1>(b));
        db().modify( add, [&]( asset_dynamic_data_object& obj )
        {
           obj.confidential_supply -= boost::get<1>(b).amount;
