@@ -166,6 +166,9 @@ void transfer_to_confidential_operation::validate()const
    FC_ASSERT( outputs.size(), "there must be at least one output" );
    FC_ASSERT( std::is_sorted(outputs.begin(), outputs.end(), [](const confidential_tx &a, const confidential_tx &b){ return a.commitment < b.commitment; }),
               "all outputs must be sorted by commitment id" );
+   for(const auto &out : outputs)
+       if(out.message)
+           FC_ASSERT(out.message->size( ) <= 176, "message is too long");
 
    auto in_commit = fc::ecc::blind(blinding_factor, uint64_t(amount.asset_id), amount.amount.value);
 
@@ -204,6 +207,10 @@ void transfer_from_confidential_operation::validate()const
    FC_ASSERT( fee.amount >= 0 );
    for(auto && a : amount)
        FC_ASSERT( a.amount > 0, "non positive amount");
+   for(const auto &out : outputs)
+       if(out.message)
+           FC_ASSERT(out.message->size( ) <= 176, "message is too long");
+
    vector<commitment_type> in_commits(inputs.size());
    vector<commitment_type> out_commits(outputs.size());
 

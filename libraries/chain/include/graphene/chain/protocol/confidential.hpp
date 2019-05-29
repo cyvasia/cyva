@@ -272,6 +272,7 @@ struct confidential_tx
    public_key_type                         owner;
    vector<char>                            data;
    optional<range_proof_type>              range_proof; ///< only required if there is more than one blind output
+   optional<vector<char>>                  message;
 };
 
 struct transfer_to_confidential_operation : public base_operation

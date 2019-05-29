@@ -92,6 +92,7 @@ class confidential_tx_object : public graphene::db::abstract_object<confidential
     public_key_type            owner;
     vector<char>               data;
     optional<range_proof_type> range_proof; ///< only required if there is more than one blind output
+    optional<vector<char>>     message;
     bool                       unspent;
     fc::time_point_sec         timestamp;
     uint32_t                   block_number;

@@ -189,6 +189,7 @@ void_result transfer_to_confidential_evaluator::do_apply( const operation_type& 
            obj.owner        = out.owner;
            obj.range_proof  = out.range_proof;
            obj.data         = out.data;
+           obj.message      = out.message;
            obj.unspent      = true;
            obj.timestamp    = db( ).head_block_time( );
            obj.block_number = db( ).head_block_num( );
@@ -279,6 +280,7 @@ void_result transfer_from_confidential_evaluator::do_apply( const operation_type
            obj.owner        = out.owner;
            obj.range_proof  = out.range_proof;
            obj.data         = out.data;
+           obj.message      = out.message;
            obj.unspent      = true;
            obj.timestamp    = db( ).head_block_time( );
            obj.block_number = db( ).head_block_num( );
