@@ -25,6 +25,7 @@
 #pragma once
 #include <graphene/chain/protocol/base.hpp>
 
+
 namespace graphene { namespace chain {
 
 using fc::ecc::blind_factor_type;
@@ -258,6 +259,66 @@ struct blind_transfer_operation : public base_operation
 
 ///@} endgroup stealth
 
+/**
+ *  @class transfer_to_confidential_operation
+ *  @ingroup confidential
+ *  @brief Converts public account balance to a confidential balance
+ */
+
+struct confidential_tx
+{
+   fc::ecc::commitment_type                commitment;
+   public_key_type                         tx_key;
+   public_key_type                         owner;
+   vector<char>                            data;
+   optional<range_proof_type>              range_proof; ///< only required if there is more than one blind output
+   optional<vector<char>>                  message;
+};
+
+struct transfer_to_confidential_operation : public base_operation
+{
+   struct fee_parameters_type {
+      uint64_t fee              = 50*GRAPHENE_BLOCKCHAIN_PRECISION / 1000;
+      uint32_t price_per_output = 50*GRAPHENE_BLOCKCHAIN_PRECISION / 1000;
+   };
+
+
+   asset                 fee;
+   asset                 amount;
+   account_id_type       from;
+   blind_factor_type     blinding_factor;
+
+   vector<confidential_tx>  outputs;
+
+   account_id_type fee_payer()const { return from; }
+   void            validate()const;
+   share_type      calculate_fee(const fee_parameters_type& )const;
+};
+
+struct transfer_from_confidential_operation : public base_operation
+{
+   struct fee_parameters_type {
+      uint64_t fee              = 50*GRAPHENE_BLOCKCHAIN_PRECISION / 1000;
+      uint32_t price_per_output = 50*GRAPHENE_BLOCKCHAIN_PRECISION / 1000;
+   };
+
+
+   asset                     fee;
+   vector<confidential_tx>   inputs;
+
+   vector<public_key_type>   to;
+   vector<asset>             amount;
+   blind_factor_type         blinding_factor;
+
+   vector<confidential_tx>   outputs;
+
+   account_id_type fee_payer()const { return GRAPHENE_TEMP_ACCOUNT; }
+   void            validate()const;
+   share_type      calculate_fee(const fee_parameters_type& )const;
+   void            get_required_authorities( vector<authority>& a )const;
+};
+
+
 } } // graphene::chain
 
 FC_REFLECT( graphene::chain::stealth_confirmation,
@@ -281,3 +342,12 @@ FC_REFLECT( graphene::chain::blind_transfer_operation,
 FC_REFLECT( graphene::chain::transfer_to_blind_operation::fee_parameters_type, (fee)(price_per_output) )
 FC_REFLECT( graphene::chain::transfer_from_blind_operation::fee_parameters_type, (fee) )
 FC_REFLECT( graphene::chain::blind_transfer_operation::fee_parameters_type, (fee)(price_per_output) )
+
+FC_REFLECT( graphene::chain::confidential_tx,
+            (commitment)(data)(range_proof)(owner)(tx_key) )
+FC_REFLECT( graphene::chain::transfer_to_confidential_operation,
+            (fee)(amount)(from)(blinding_factor)(outputs) )
+FC_REFLECT( graphene::chain::transfer_to_confidential_operation::fee_parameters_type, (fee)(price_per_output) )
+FC_REFLECT( graphene::chain::transfer_from_confidential_operation,
+           (fee)(amount)(to)(inputs)(outputs)(blinding_factor) )
+FC_REFLECT( graphene::chain::transfer_from_confidential_operation::fee_parameters_type, (fee)(price_per_output) )

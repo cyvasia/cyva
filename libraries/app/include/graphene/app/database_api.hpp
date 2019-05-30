@@ -568,6 +568,7 @@ namespace graphene { namespace app {
           *  @return the set of blinded balance objects by commitment ID
           */
          vector<blinded_balance_object> get_blinded_balances( const flat_set<commitment_type>& commitments )const;
+         vector<confidential_tx_object> get_confidential_transactions(const string &a, const string &B , bool unspent)const;
 
          ////////////
          // CYVA //
@@ -675,4 +676,5 @@ FC_API(graphene::app::database_api,
 
           // CYVA
           (get_real_supply)
+          (get_confidential_transactions)
 )

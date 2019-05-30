@@ -63,4 +63,26 @@ class blind_transfer_evaluator : public evaluator<blind_transfer_evaluator>
       virtual void pay_fee() override;
 };
 
+class transfer_to_confidential_evaluator : public evaluator<transfer_to_confidential_evaluator>
+{
+   public:
+      typedef transfer_to_confidential_operation operation_type;
+
+      void_result do_evaluate( const operation_type& op );
+      void_result do_apply( const operation_type& op ) ;
+
+      virtual void pay_fee() override;
+};
+
+class transfer_from_confidential_evaluator : public evaluator<transfer_from_confidential_evaluator>
+{
+   public:
+      typedef transfer_from_confidential_operation operation_type;
+
+      void_result do_evaluate( const operation_type& op );
+      void_result do_apply( const operation_type& op ) ;
+
+      virtual void pay_fee() override;
+};
+
 } } // namespace graphene::chain

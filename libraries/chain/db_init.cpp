@@ -113,8 +113,8 @@ void database::initialize_evaluators()
    register_evaluator<transfer_to_blind_evaluator>();
    register_evaluator<transfer_from_blind_evaluator>();
    register_evaluator<blind_transfer_evaluator>();
-   register_evaluator<rfu_evaluator_4>();
-   register_evaluator<rfu_evaluator_5>();
+   register_evaluator<transfer_to_confidential_evaluator>();
+   register_evaluator<transfer_from_confidential_evaluator>();
    register_evaluator<rfu_evaluator_6>();
    register_evaluator<rfu_evaluator_7>();
    register_evaluator<rfu_evaluator_8>();
@@ -194,6 +194,7 @@ void database::initialize_indexes()
 
    add_index< primary_index<vesting_balance_index> >();
    add_index< primary_index<blinded_balance_index> >();
+   add_index< primary_index<confidential_tx_index> >();
 
    //Implementation object indexes
    add_index< primary_index<transaction_index                             > >();

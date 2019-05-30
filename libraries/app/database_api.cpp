@@ -23,11 +23,11 @@
  * THE SOFTWARE.
  */
 
- #include <functional>
+#include <functional>
  
 #include <graphene/app/database_api.hpp>
 #include <graphene/chain/get_config.hpp>
-
+#include <graphene/utilities/key_conversion.hpp>
 
 #include <fc/bloom_filter.hpp>
 #include <fc/smart_ref_impl.hpp>
@@ -163,6 +163,7 @@ namespace graphene { namespace app {
       
       // Blinded balances
       vector<blinded_balance_object> get_blinded_balances( const flat_set<commitment_type>& commitments )const;
+      vector<confidential_tx_object> get_confidential_transactions(const fc::ecc::private_key &a, const fc::ecc::public_key &B, bool unspent)const;
       
       // CYVA
 
@@ -1408,7 +1409,6 @@ namespace graphene { namespace app {
       
       vector< fc::variant > result;
       result.reserve(ops.size());
-      const asset_object& a = id(_db);
       get_required_fees_helper helper(
                                       _db.current_fee_schedule(),
                                       GET_REQUIRED_FEES_MAX_RECURSION );
@@ -1467,7 +1467,6 @@ namespace graphene { namespace app {
 
       auto itr = idx.begin();
   
-      int64_t time_to_maint = -1;
       fc::time_point_sec next_time = (fc::time_point_sec)0;
       fc::time_point_sec prev_time = (fc::time_point_sec)0;
 
@@ -1528,6 +1527,32 @@ namespace graphene { namespace app {
       return result;
    }
 
+
+   vector<confidential_tx_object> database_api::get_confidential_transactions(const string &a, const string &B, bool unspent) const
+   {
+       try{
+           auto B_ = public_key_type(B);
+           auto a_ = *utilities::wif_to_key(a);
+           return my->get_confidential_transactions(a_, B_, unspent);
+       } catch(...) {
+           return {};
+       }
+   }
+
+   vector<confidential_tx_object> database_api_impl::get_confidential_transactions(fc::ecc::private_key const &a, const fc::ecc::public_key &B, bool unspent)const
+   {
+      vector<confidential_tx_object> result;
+      const auto& bal_idx = _db.get_index_type<confidential_tx_index>();
+      const auto& trxs = bal_idx.indices().get<by_unspent>();
+
+      std::copy_if(trxs.lower_bound(unspent), trxs.end(), std::back_inserter(result), [&](confidential_tx_object const & t)
+      {
+          auto p = B.add(fc::sha256::hash(a.get_shared_secret(t.tx_key)));
+          return public_key_type(p) == t.owner;
+      });
+
+      return result;
+   }
    //////////////////////////////////////////////////////////////////////
    //                                                                  //
    // Private methods                                                  //

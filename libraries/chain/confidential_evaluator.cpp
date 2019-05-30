@@ -21,20 +21,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+#include <graphene/chain/account_object.hpp>
 #include <graphene/chain/exceptions.hpp>
 #include <graphene/chain/protocol/confidential.hpp>
 #include <graphene/chain/confidential_evaluator.hpp>
 #include <graphene/chain/confidential_object.hpp>
 #include <graphene/chain/database.hpp>
 #include <graphene/chain/hardfork.hpp>
+#include <graphene/chain/transaction_detail_object.hpp>
+#include <boost/range/combine.hpp>
 
 namespace graphene { namespace chain {
 
 void_result transfer_to_blind_evaluator::do_evaluate( const transfer_to_blind_operation& o )
 { try {
    const auto& d = db();
-
-   const auto& atype = o.amount.asset_id(db()); 
 
    for( const auto& out : o.outputs )
    {
@@ -165,4 +166,131 @@ void blind_transfer_evaluator::pay_fee()
       generic_evaluator::pay_fee();
 }
 
+void_result transfer_to_confidential_evaluator::do_evaluate( const operation_type& op )
+{ try { return void_result(); } FC_CAPTURE_AND_RETHROW( (op) ) }
+
+
+void_result transfer_to_confidential_evaluator::do_apply( const operation_type& op )
+{ try {
+
+   const auto& add = op.amount.asset_id(db()).dynamic_asset_data_id(db());  // verify fee is a legit asset
+
+   db().adjust_balance( op.from, -op.amount );
+   db().modify( add, [&]( asset_dynamic_data_object& obj )
+   {
+      obj.confidential_supply += op.amount.amount;
+      FC_ASSERT( obj.confidential_supply >= 0 );
+   });
+   for( const auto& out : op.outputs )
+   {
+       db( ).create<confidential_tx_object>([&](confidential_tx_object &obj) {
+           obj.commitment   = out.commitment;
+           obj.tx_key       = out.tx_key;
+           obj.owner        = out.owner;
+           obj.range_proof  = out.range_proof;
+           obj.data         = out.data;
+           obj.message      = out.message;
+           obj.unspent      = true;
+           obj.timestamp    = db( ).head_block_time( );
+           obj.block_number = db( ).head_block_num( );
+       });
+   }
+
+   db().create<transaction_detail_object>([&](transaction_detail_object& obj)
+                                          {
+                                              obj.m_operation_type = (uint8_t)transaction_detail_object::transfer;
+
+                                              obj.m_from_account = op.from;
+                                              obj.m_to_account = GRAPHENE_NULL_ACCOUNT;
+                                              obj.m_transaction_amount = op.amount;
+                                              obj.m_transaction_fee = op.fee;
+                                              obj.m_str_description = "confidential transfer";
+                                              obj.m_timestamp = db().head_block_time();
+                                              obj.m_block_number = db().head_block_num();
+                                          });
+   return void_result();
+} FC_CAPTURE_AND_RETHROW( (op) ) }
+
+void transfer_to_confidential_evaluator::pay_fee() { generic_evaluator::pay_fee(); }
+
+
+void_result transfer_from_confidential_evaluator::do_evaluate( const operation_type& op )
+{ try { return void_result(); } FC_CAPTURE_AND_RETHROW( (op) ) }
+
+
+void_result transfer_from_confidential_evaluator::do_apply( const operation_type& op )
+{ try {
+
+   const auto& cti = db().get_index_type<confidential_tx_index>();
+   const auto& ci = cti.indices().get<by_commitment>();
+   const auto& add = op.fee.asset_id(db()).dynamic_asset_data_id(db());  // verify fee is a legit asset
+   const auto& ai = db().get_index_type<account_index>().indices().get<by_name>();
+
+   for (auto b : boost::combine(op.to, op.amount))
+   {
+       auto to = boost::get<0>(b);
+       std::string to_name(to);
+
+       auto itr_name = ai.find(to_name);
+       FC_ASSERT(itr_name != ai.end(), "address not found", ("address", *itr_name));
+
+       db().adjust_balance(itr_name->get_id(), boost::get<1>(b));
+       db().modify( add, [&]( asset_dynamic_data_object& obj )
+       {
+          obj.confidential_supply -= boost::get<1>(b).amount;
+          FC_ASSERT( obj.confidential_supply >= 0 );
+       });
+       db().create<transaction_detail_object>([&](transaction_detail_object& obj)
+                                              {
+                                                  obj.m_operation_type = (uint8_t)transaction_detail_object::transfer;
+
+                                                  obj.m_from_account = GRAPHENE_NULL_ACCOUNT;
+                                                  obj.m_to_account = itr_name->get_id();
+                                                  obj.m_transaction_amount = boost::get<1>(b);
+                                                  obj.m_transaction_fee = asset(0, op.fee.asset_id);
+                                                  obj.m_str_description = "confidential transfer";
+                                                  obj.m_timestamp = db().head_block_time();
+                                                  obj.m_block_number = db().head_block_num();
+                                              });
+
+   }
+   db().adjust_balance(op.fee_payer(), op.fee.amount);
+   db().modify( add, [&]( asset_dynamic_data_object& obj )
+   {
+       obj.confidential_supply -= op.fee.amount;
+       FC_ASSERT( obj.confidential_supply >= 0 );
+   });
+
+   for(const auto& in : op.inputs)
+   {
+      auto itr = ci.find(in.commitment);
+      GRAPHENE_ASSERT( itr != ci.end(), blind_transfer_unknown_commitment, "", ("commitment", in.commitment) );
+      FC_ASSERT(itr->unspent, "already spent commitment", ("commitment", in.commitment));
+
+      db().modify( *itr, [&]( confidential_tx_object& obj ){
+          obj.unspent = false;
+          obj.range_proof.reset();
+      });
+   }
+   for(const auto& out : op.outputs)
+   {
+       db( ).create<confidential_tx_object>([&](confidential_tx_object &obj) {
+           obj.commitment   = out.commitment;
+           obj.tx_key       = out.tx_key;
+           obj.owner        = out.owner;
+           obj.range_proof  = out.range_proof;
+           obj.data         = out.data;
+           obj.message      = out.message;
+           obj.unspent      = true;
+           obj.timestamp    = db( ).head_block_time( );
+           obj.block_number = db( ).head_block_num( );
+       });
+   }
+   return void_result();
+} FC_CAPTURE_AND_RETHROW( (op) ) }
+
+void transfer_from_confidential_evaluator::pay_fee()
+{
+      generic_evaluator::pay_fee();
+}
 } } // graphene::chain

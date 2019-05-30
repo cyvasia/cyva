@@ -139,7 +139,8 @@ namespace graphene { namespace chain {
       impl_miner_schedule_object_type,
       impl_budget_record_object_type,
       impl_transaction_detail_object_type,
-      impl_blinded_balance_object_type
+      impl_blinded_balance_object_type,
+      impl_confidential_tx_object_type
    };
 
    //typedef fc::unsigned_int            object_id_type;
@@ -323,6 +324,7 @@ FC_REFLECT_ENUM( graphene::chain::object_type,
                  (custom_object_type)
                  (proposal_object_type)
                  (operation_history_object_type)
+                 (withdraw_permission_object_type)
                  (vesting_balance_object_type)
                  (OBJECT_TYPE_COUNT)
                )
@@ -341,6 +343,7 @@ FC_REFLECT_ENUM( graphene::chain::impl_object_type,
                  (impl_budget_record_object_type)
                  (impl_transaction_detail_object_type)
                  (impl_blinded_balance_object_type)
+                 (impl_confidential_tx_object_type)
                )
 
 FC_REFLECT_TYPENAME( graphene::chain::share_type )
