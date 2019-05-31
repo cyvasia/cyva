@@ -186,4 +186,26 @@ void database::deposit_miner_pay(const miner_object& wit, share_type amount)
    return;
 }
 
+void database::deposit_account_pay(const account_object& ait, share_type amount)
+{
+    if( amount == 0 )
+        return;
+
+    optional< vesting_balance_id_type > new_vbid = deposit_lazy_vesting(
+        ait.cashback_vb,
+        amount,
+        get_global_properties().parameters.miner_pay_vesting_seconds,
+        ait.get_id(),
+        true );
+
+    if( new_vbid.valid() )
+    {
+        modify( ait, [&]( account_object& _wit )
+               {
+                   _wit.cashback_vb = *new_vbid;
+               } );
+    }
+
+    return;
+}
 } }

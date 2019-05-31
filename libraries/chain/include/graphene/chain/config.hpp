@@ -174,3 +174,5 @@
 /// Sentinel value used in the scheduler.
 #define GRAPHENE_NULL_MINER (graphene::chain::miner_id_type(0))
 ///@}
+
+#define VOTE_REWARD_FORK 545000

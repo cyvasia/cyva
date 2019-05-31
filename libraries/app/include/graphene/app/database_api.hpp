@@ -393,7 +393,7 @@ namespace graphene { namespace app {
           * @ingroup DatabaseAPI
           */
          vector<vesting_balance_object> get_vesting_balances( account_id_type account_id )const;
-
+         vector<vesting_balance_object_with_info> get_vesting_balances_with_info(account_id_type account_id) const;
          /**
           * @brief Get the total number of accounts registered with the blockchain
           * @ingroup DatabaseAPI
@@ -466,7 +466,7 @@ namespace graphene { namespace app {
           * @return Map of miner names to corresponding IDs
           * @ingroup DatabaseAPI
           */
-         map<string, miner_id_type> lookup_miner_accounts(const string& lower_bound_name, uint32_t limit)const;
+         map<string, miner_object> lookup_miner_accounts(const string& lower_bound_name, uint32_t limit)const;
 
          /**
           * @brief Get the total number of miners registered with the blockchain
@@ -644,6 +644,7 @@ FC_API(graphene::app::database_api,
           (get_account_balances)
           (get_named_account_balances)
           (get_vesting_balances)
+          (get_vesting_balances_with_info)
 
           // Assets
           (get_assets)

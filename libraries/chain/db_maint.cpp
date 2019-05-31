@@ -242,7 +242,14 @@ void database::perform_chain_maintenance(const signed_block& next_block, const g
          uint64_t voting_stake = stats.total_core_in_orders.value
             + (stake_account.cashback_vb.valid() ? (*stake_account.cashback_vb)(d).balance.amount.value: 0)
             + d.get_balance(stake_account.get_id(), asset_id_type()).amount.value;
-         
+
+         const auto &idx = d.get_index_type<account_balance_index>( ).indices( ).get<by_owner>( );
+         auto        it  = idx.find(stake_account.get_id());
+         if(idx.end( ) != it)
+             d.modify(*it, [&](account_balance_object &o) {
+                 o.votecast = voting_stake;
+             });
+
          for( vote_id_type id : opinion_account.options.votes )
          {
             uint32_t offset = id.instance();

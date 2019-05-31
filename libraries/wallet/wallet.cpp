@@ -977,14 +977,8 @@ public:
       if( !acct_id )
          acct_id = get_account( account_name ).id;
 
-      vector< vesting_balance_object > vbos = _remote_db->get_vesting_balances( *acct_id );
-      if( vbos.size() == 0 )
-         return result;
+     return _remote_db->get_vesting_balances_with_info( *acct_id );
 
-      for( const vesting_balance_object& vbo : vbos )
-         result.emplace_back( vbo, now );
-
-      return result;
    } FC_CAPTURE_AND_RETHROW( (account_name) )
    }
 
@@ -2483,7 +2477,7 @@ public:
       lock();
    }
 
-   map<string,miner_id_type> wallet_api::list_miners(const string& lowerbound, uint32_t limit)
+   map<string, miner_object> wallet_api::list_miners(const string& lowerbound, uint32_t limit)
    {
       return my->_remote_db->lookup_miner_accounts(lowerbound, limit);
    }
@@ -2716,13 +2710,6 @@ public:
       transaction_ids.reserve( transactions.size() );
       for( const processed_transaction& tx : transactions )
          transaction_ids.push_back( tx.id() );
-   }
-
-   vesting_balance_object_with_info::vesting_balance_object_with_info( const vesting_balance_object& vbo, fc::time_point_sec now )
-      : vesting_balance_object( vbo )
-   {
-      allowed_withdraw = get_allowed_withdraw( now );
-      allowed_withdraw_time = now;
    }
 
    real_supply wallet_api::get_real_supply()const

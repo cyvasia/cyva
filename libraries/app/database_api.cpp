@@ -143,7 +143,7 @@ namespace graphene { namespace app {
       // Miners
       vector<optional<miner_object>> get_miners(const vector<miner_id_type>& miner_ids)const;
       fc::optional<miner_object> get_miner_by_account(account_id_type account)const;
-      map<string, miner_id_type> lookup_miner_accounts(const string& lower_bound_name, uint32_t limit)const;
+      map<string, miner_object> lookup_miner_accounts(const string& lower_bound_name, uint32_t limit)const;
       uint64_t get_miner_count()const;
       
       // Votes
@@ -1029,7 +1029,21 @@ namespace graphene { namespace app {
       }
       FC_CAPTURE_AND_RETHROW( (account_id) );
    }
-   
+
+   vector<vesting_balance_object_with_info> database_api::get_vesting_balances_with_info(account_id_type account_id) const
+   {
+       std::vector<vesting_balance_object_with_info> result;
+
+       vector<vesting_balance_object> vbos = get_vesting_balances(account_id);
+       if(vbos.size( ) == 0)
+           return result;
+
+       for(const vesting_balance_object &vbo : vbos)
+           result.emplace_back(vbo, head_block_time( ));
+
+       return result;
+   }
+
    //////////////////////////////////////////////////////////////////////
    //                                                                  //
    // Assets                                                           //
@@ -1142,12 +1156,12 @@ namespace graphene { namespace app {
       return {};
    }
    
-   map<string, miner_id_type> database_api::lookup_miner_accounts(const string& lower_bound_name, uint32_t limit)const
+   map<string, miner_object> database_api::lookup_miner_accounts(const string& lower_bound_name, uint32_t limit)const
    {
       return my->lookup_miner_accounts( lower_bound_name, limit );
    }
    
-   map<string, miner_id_type> database_api_impl::lookup_miner_accounts(const string& lower_bound_name, uint32_t limit)const
+   map<string, miner_object> database_api_impl::lookup_miner_accounts(const string& lower_bound_name, uint32_t limit)const
    {
       FC_ASSERT( limit <= 1000 );
       const auto& miners_by_id = _db.get_index_type<miner_index>().indices().get<by_id>();
@@ -1157,11 +1171,11 @@ namespace graphene { namespace app {
       // get all the names and look them all up, sort them, then figure out what
       // records to return.  This could be optimized, but we expect the
       // number of miners to be few and the frequency of calls to be rare
-      std::map<std::string, miner_id_type> miners_by_account_name;
+      std::map<std::string, miner_object> miners_by_account_name;
       for (const miner_object& miner : miners_by_id)
          if (auto account_iter = _db.find(miner.miner_account))
             if (account_iter->name >= lower_bound_name) // we can ignore anything below lower_bound_name
-               miners_by_account_name.insert(std::make_pair(account_iter->name, miner.id));
+               miners_by_account_name.insert(std::make_pair(account_iter->name, miner));
       
       auto end_iter = miners_by_account_name.begin();
       while (end_iter != miners_by_account_name.end() && limit--)

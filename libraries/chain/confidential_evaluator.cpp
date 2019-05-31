@@ -198,7 +198,7 @@ void_result transfer_to_confidential_evaluator::do_apply( const operation_type& 
 
    db().create<transaction_detail_object>([&](transaction_detail_object& obj)
                                           {
-                                              obj.m_operation_type = (uint8_t)transaction_detail_object::transfer;
+                                              obj.m_operation_type = (uint8_t)transaction_detail_object::confidential_transfer;
 
                                               obj.m_from_account = op.from;
                                               obj.m_to_account = GRAPHENE_NULL_ACCOUNT;
@@ -242,7 +242,7 @@ void_result transfer_from_confidential_evaluator::do_apply( const operation_type
        });
        db().create<transaction_detail_object>([&](transaction_detail_object& obj)
                                               {
-                                                  obj.m_operation_type = (uint8_t)transaction_detail_object::transfer;
+                                                  obj.m_operation_type = (uint8_t)transaction_detail_object::confidential_transfer;
 
                                                   obj.m_from_account = GRAPHENE_NULL_ACCOUNT;
                                                   obj.m_to_account = itr_name->get_id();

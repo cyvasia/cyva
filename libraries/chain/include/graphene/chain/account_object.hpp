@@ -93,6 +93,7 @@ namespace graphene { namespace chain {
          account_id_type   owner;
          asset_id_type     asset_type;
          share_type        balance;
+         uint64_t          votecast = 0;
 
          asset get_balance()const { return asset(balance, asset_type); }
          void  adjust_balance(const asset& delta);
@@ -472,6 +473,12 @@ namespace graphene { namespace chain {
             return db.get(*cashback_vb);
          }
          account_id_type get_id()const { return id; }
+         vote_id_type get_voted_miner() const {
+             for (auto && v : options.votes)
+                 if(v.type() == vote_id_type::miner)
+                     return v;
+             return vote_id_type(vote_id_type::miner, std::numeric_limits<uint32_t>::max());
+         }
 
    };
 
@@ -506,6 +513,8 @@ namespace graphene { namespace chain {
 
    struct by_account_asset;
    struct by_asset_balance;
+   struct by_voted_miner;
+   struct by_owner;
    /**
     * @ingroup object_index
     */
@@ -513,6 +522,7 @@ namespace graphene { namespace chain {
       account_balance_object,
       indexed_by<
          ordered_unique< tag<by_id>, member< object, object_id_type, &object::id > >,
+         ordered_unique< tag<by_owner>, member< account_balance_object, account_id_type, &account_balance_object::owner> >,
          ordered_unique< tag<by_account_asset>,
             composite_key<
                account_balance_object,
@@ -572,7 +582,8 @@ namespace graphene { namespace chain {
       account_object,
       indexed_by<
          ordered_unique< tag<by_id>, member< object, object_id_type, &object::id > >,
-         ordered_unique< tag<by_name>, member<account_object, std::string, &account_object::name>  >
+         ordered_unique< tag<by_name>, member<account_object, std::string, &account_object::name>  >,
+         ordered_non_unique<tag<by_voted_miner>, const_mem_fun<account_object, vote_id_type, &account_object::get_voted_miner> >
       >
    > account_multi_index_type;
 

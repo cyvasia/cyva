@@ -253,22 +253,6 @@ namespace graphene { namespace wallet {
          vector< transaction_id_type > transaction_ids;
       };
 
-      struct vesting_balance_object_with_info : public vesting_balance_object
-      {
-         vesting_balance_object_with_info( const vesting_balance_object& vbo, fc::time_point_sec now );
-         vesting_balance_object_with_info( const vesting_balance_object_with_info& vbo ) = default;
-
-         /**
-          * How much is allowed to be withdrawn.
-          */
-         asset allowed_withdraw;
-
-         /**
-          * The time at which allowed_withdrawal was calculated.
-          */
-         fc::time_point_sec allowed_withdraw_time;
-      };
-
       namespace detail {
          class wallet_api_impl;
       }
@@ -601,7 +585,7 @@ namespace graphene { namespace wallet {
           * @returns a list of miners mapping miner names to miner ids
           * @ingroup WalletCLI
           */
-         map<string,miner_id_type>       list_miners(const string& lowerbound, uint32_t limit);
+         map<string,miner_object>       list_miners(const string& lowerbound, uint32_t limit);
 
          /**
           * s@brief Returns information about the given miner.
@@ -1327,8 +1311,6 @@ FC_REFLECT( graphene::wallet::approval_delta,
 FC_REFLECT_DERIVED( graphene::wallet::signed_block_with_info, (graphene::chain::signed_block),
                     (block_id)(signing_key)(transaction_ids) )
 
-FC_REFLECT_DERIVED( graphene::wallet::vesting_balance_object_with_info, (graphene::chain::vesting_balance_object),
-                    (allowed_withdraw)(allowed_withdraw_time) )
 
 FC_REFLECT_DERIVED( graphene::wallet::transaction_detail_object_ex,
                     (graphene::chain::transaction_detail_object),(m_from_account_public_key)(m_to_account_public_key) )

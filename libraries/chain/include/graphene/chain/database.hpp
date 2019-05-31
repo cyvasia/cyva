@@ -330,7 +330,7 @@ namespace graphene { namespace chain {
          void deposit_cashback(const account_object& acct, share_type amount, bool require_vesting = true);
          // helper to handle miner pay
          void deposit_miner_pay(const miner_object& wit, share_type amount);
-
+         void deposit_account_pay(const account_object& ait, share_type amount);
          //////////////////// db_debug.cpp ////////////////////
 
          void debug_dump();

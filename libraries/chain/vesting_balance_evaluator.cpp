@@ -25,6 +25,7 @@
 
 #include <graphene/chain/account_object.hpp>
 #include <graphene/chain/database.hpp>
+#include <graphene/chain/transaction_detail_object.hpp>
 #include <graphene/chain/vesting_balance_evaluator.hpp>
 #include <graphene/chain/vesting_balance_object.hpp>
 
@@ -130,6 +131,18 @@ void_result vesting_balance_withdraw_evaluator::do_apply( const vesting_balance_
       vbo.withdraw( now, op.amount );
    } );
 
+   db().create<transaction_detail_object>([&](transaction_detail_object& obj)
+                                          {
+                                              obj.m_operation_type = (uint8_t)transaction_detail_object::withdraw;
+
+                                              obj.m_from_account = op.owner;
+                                              obj.m_to_account = op.owner;
+                                              obj.m_transaction_amount = op.amount;
+                                              obj.m_transaction_fee = op.fee;
+                                              obj.m_str_description = "vesting balance withdraw";
+                                              obj.m_timestamp = db().head_block_time();
+                                              obj.m_block_number = db().head_block_num();
+                                          });
    d.adjust_balance( op.owner, op.amount );
 
    // TODO: Check asset authorizations and withdrawals

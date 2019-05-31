@@ -18,10 +18,8 @@ namespace graphene { namespace chain {
       {
          transfer,
          account_create,
-         content_submit,
-         content_buy,
-         content_rate,
-         subscription
+         confidential_transfer,
+         withdraw
       };
       account_id_type m_from_account;
       account_id_type m_to_account;
