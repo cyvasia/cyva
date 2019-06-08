@@ -135,13 +135,15 @@ void database::update_signing_miner(const miner_object& signing_miner, const sig
    else
    {
        auto tot_pay       = miner_pay_from_fees + miner_pay_from_reward;
-       auto voters_reward = tot_pay * 3 / 5;
+       auto voters_reward = fc::uint128(tot_pay.value);
+       voters_reward *= 3;
+       voters_reward /= 5;
 
        auto account_votecast = [&](const account_object &ao) {
-           const auto &idx    = get_index_type<account_balance_index>( ).indices( ).get<by_owner>();
+           const auto &idx = get_index_type<account_balance_index>( ).indices( ).get<by_owner>( );
            // Extracted from vote_tally_helper
-           auto it = idx.find(ao.get_id());
-           if(idx.end() != it)
+           auto it = idx.find(ao.get_id( ));
+           if(idx.end( ) != it)
                return it->votecast;
            return uint64_t(0);
        };
@@ -152,15 +154,17 @@ void database::update_signing_miner(const miner_object& signing_miner, const sig
 
        fc::safe<uint64_t> tot_deposited = 0;
        if(signing_miner.total_votes > 0)
+       {
+           auto tot_votes = fc::uint128(signing_miner.total_votes);
            for(auto it = _begin; it != _end; ++it)
            {
-               auto deposit = (uint64_t) std::exp2(
-                   std::log2(voters_reward.value) +
-                   std::log2(account_votecast(*it)) -
-                   std::log2(signing_miner.total_votes));
+               auto deposit_ = voters_reward * fc::uint128(account_votecast(*it)) / tot_votes;
+               auto deposit  = deposit_.to_uint64( );
+
                deposit_account_pay(*it, deposit);
                tot_deposited += deposit;
            }
+       }
 
        deposit_miner_pay(signing_miner, tot_pay - tot_deposited.value);
    }
