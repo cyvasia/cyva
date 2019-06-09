@@ -247,7 +247,7 @@ void database::perform_chain_maintenance(const signed_block& next_block, const g
          auto        it  = idx.find(stake_account.get_id());
          if(idx.end( ) != it)
              d.modify(*it, [&](account_balance_object &o) {
-                 o.votecast = voting_stake;
+                 o.vote_power = voting_stake;
              });
 
          for( vote_id_type id : opinion_account.options.votes )

@@ -144,7 +144,7 @@ void database::update_signing_miner(const miner_object& signing_miner, const sig
            // Extracted from vote_tally_helper
            auto it = idx.find(ao.get_id( ));
            if(idx.end( ) != it)
-               return it->votecast;
+               return it->vote_power;
            return uint64_t(0);
        };
 

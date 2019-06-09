@@ -473,6 +473,7 @@ namespace graphene { namespace app {
           * @ingroup DatabaseAPI
           */
          uint64_t get_miner_count()const;
+         vector<account_balance_object> get_miner_voters(const string &miner_id)const;
 
          ///////////
          // Votes //
@@ -656,6 +657,7 @@ FC_API(graphene::app::database_api,
           (get_miner_by_account)
           (lookup_miner_accounts)
           (get_miner_count)
+          (get_miner_voters)
 
           // Votes
           (lookup_vote_ids)

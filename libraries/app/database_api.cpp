@@ -145,6 +145,7 @@ namespace graphene { namespace app {
       fc::optional<miner_object> get_miner_by_account(account_id_type account)const;
       map<string, miner_object> lookup_miner_accounts(const string& lower_bound_name, uint32_t limit)const;
       uint64_t get_miner_count()const;
+      vector<account_balance_object> get_miner_voters(const string &miner_id)const;
       
       // Votes
       vector<variant> lookup_vote_ids( const vector<vote_id_type>& votes )const;
@@ -1193,6 +1194,38 @@ namespace graphene { namespace app {
    {
       return _db.get_index_type<miner_index>().indices().size();
    }
+
+   vector<account_balance_object> database_api::get_miner_voters(const string &miner_id)const
+   {
+       return my->get_miner_voters(miner_id);
+   }
+
+   vector<account_balance_object> database_api_impl::get_miner_voters(const string &miner_id)const
+   {
+       vector<account_balance_object> result;
+       auto const & mix = _db.get_index_type<miner_index>().indices();
+
+       auto const & mit = mix.find(object_id_type(miner_id));
+       if (mit == mix.end())
+           return result;
+
+       auto const & vid = mit->vote_id;
+       auto const & aix = _db.get_index_type<account_index>().indices().get<by_voted_miner>();
+       auto const & abix = _db.get_index_type<account_balance_index>().indices().get<by_owner>();
+
+       auto _begin = aix.lower_bound(vid);
+       auto _end = aix.upper_bound(vid);
+       for(auto a = _begin; a != _end; ++a)
+       {
+           auto i = abix.find(a->get_id());
+           if (i != abix.end())
+               result.push_back(*i);
+       }
+
+       return result;
+   }
+
+
    
    //////////////////////////////////////////////////////////////////////
    //                                                                  //
