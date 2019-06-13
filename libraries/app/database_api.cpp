@@ -403,7 +403,35 @@ namespace graphene { namespace app {
          return optional<signed_transaction>();
       }
    }
-   
+
+   map<string, signed_transaction> database_api::get_transactions_by_id(vector<string> ids) const
+   {
+       set<transaction_id_type>        id_set;
+       map<string, signed_transaction> result;
+       for(auto &&id : ids)
+           id_set.insert(transaction_id_type(id));
+
+       auto hbn = get_head_block( )->block_num( );
+       for(size_t i = 0; i < hbn; ++i)
+       {
+           auto blk = get_block(i);
+           if(blk)
+               for(auto &&tx : blk->transactions)
+               {
+                   if(id_set.empty( ))
+                       return result;
+
+                   auto it = id_set.find(tx.id( ));
+                   if(id_set.end( ) != it)
+                   {
+                       result[string(tx.id( ))] = signed_transaction(tx);
+                       id_set.erase(it);
+                   }
+               }
+       }
+       return result;
+   }
+
    processed_transaction database_api_impl::get_transaction(uint32_t block_num, uint32_t trx_num)const
    {
       auto opt_block = _db.fetch_block_by_number(block_num);

@@ -37,6 +37,7 @@
 #include <graphene/chain/proposal_object.hpp>
 #include <graphene/chain/miner_object.hpp>
 #include <graphene/chain/budget_record_object.hpp>
+#include <graphene/chain/transaction_object.hpp>
 #include <graphene/chain/transaction_detail_object.hpp>
 #include <graphene/chain/confidential_object.hpp>
 
@@ -230,6 +231,7 @@ namespace graphene { namespace app {
           * @ingroup DatabaseAPI
           */
          optional<signed_transaction> get_recent_transaction_by_id( const transaction_id_type& id )const;
+         map<string, signed_transaction> get_transactions_by_id(vector<string> ids )const;
 
          /////////////
          // Globals //
@@ -612,6 +614,7 @@ FC_API(graphene::app::database_api,
           (get_block)
           (get_blocks)
           (get_transaction)
+          (get_transactions_by_id)
           (head_block_time)
           (get_head_block)
           (get_nearest_block)
