@@ -324,6 +324,10 @@ namespace graphene { namespace app {
                   break;
                  case impl_budget_record_object_type:
                   break;
+                 case impl_blinded_balance_object_type:
+                 case impl_confidential_tx_object_type:
+                 case impl_transaction_detail_object_type:
+                     break;
           }
        }
        return result;
