@@ -1974,7 +1974,7 @@ public:
                      string str_memo =
                         memo->get_message(wtok, memo->from);
 
-                     item.m_str_description += str_memo;
+                     item.m_str_description += fc::to_hex(str_memo.data(), str_memo.size());
                   }
                }
 
