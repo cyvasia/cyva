@@ -241,6 +241,7 @@ void database::init_genesis(const genesis_state_type& genesis_state)
    create<account_balance_object>([](account_balance_object& b) {
       b.balance = GRAPHENE_INITIAL_SHARE_SUPPLY;
       b.vote_power = 0;
+      b.casted_vote = {vote_id_type::miner, std::numeric_limits<uint32_t>::max()};
    });
 
    FC_ASSERT(create<account_object>([this](account_object& a) {

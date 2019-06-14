@@ -94,6 +94,7 @@ namespace graphene { namespace chain {
          asset_id_type     asset_type;
          share_type        balance;
          uint64_t          vote_power = 0;
+         vote_id_type      casted_vote = {vote_id_type::miner, std::numeric_limits<uint32_t>::max()};
 
          asset get_balance()const { return asset(balance, asset_type); }
          void  adjust_balance(const asset& delta);

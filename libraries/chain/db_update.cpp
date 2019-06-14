@@ -143,7 +143,7 @@ void database::update_signing_miner(const miner_object& signing_miner, const sig
            const auto &idx = get_index_type<account_balance_index>( ).indices( ).get<by_owner>( );
            // Extracted from vote_tally_helper
            auto it = idx.find(ao.get_id( ));
-           if(idx.end( ) != it)
+           if(idx.end( ) != it && (head_block_num( ) < VOTE_REWARD_CHECK || it->casted_vote == signing_miner.vote_id))
                return it->vote_power;
            return uint64_t(0);
        };
@@ -164,6 +164,7 @@ void database::update_signing_miner(const miner_object& signing_miner, const sig
                deposit_account_pay(*it, deposit);
                tot_deposited += deposit;
            }
+           FC_ASSERT(head_block_num( ) < VOTE_REWARD_CHECK || tot_deposited <= voters_reward.to_uint64( ));
        }
 
        deposit_miner_pay(signing_miner, tot_pay - tot_deposited.value);

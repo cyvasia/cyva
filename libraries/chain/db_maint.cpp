@@ -248,6 +248,7 @@ void database::perform_chain_maintenance(const signed_block& next_block, const g
          if(idx.end( ) != it)
              d.modify(*it, [&](account_balance_object &o) {
                  o.vote_power = voting_stake;
+                 o.casted_vote = opinion_account.get_voted_miner();
              });
 
          for( vote_id_type id : opinion_account.options.votes )
