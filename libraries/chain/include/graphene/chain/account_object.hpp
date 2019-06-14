@@ -543,7 +543,8 @@ namespace graphene { namespace chain {
                std::greater< share_type >,
                std::less< account_id_type >
             >
-         >
+         >,
+         ordered_non_unique<tag<by_voted_miner>, member<account_balance_object, vote_id_type, &account_balance_object::casted_vote> >
       >
    > account_balance_object_multi_index_type;
 
@@ -604,7 +605,7 @@ FC_REFLECT_DERIVED( graphene::chain::account_object,
 
 FC_REFLECT_DERIVED( graphene::chain::account_balance_object,
                     (graphene::db::object),
-                    (owner)(asset_type)(balance)(vote_power) )
+                    (owner)(asset_type)(balance)(vote_power)(casted_vote) )
 
 FC_REFLECT_DERIVED( graphene::chain::account_statistics_object,
                     (graphene::db::object),

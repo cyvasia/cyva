@@ -132,7 +132,7 @@ void database::update_signing_miner(const miner_object& signing_miner, const sig
    {
        deposit_miner_pay(signing_miner, miner_pay_from_fees + miner_pay_from_reward);
    }
-   else
+   else if(head_block_num( ) < VOTE_REWARD_CHECK)
    {
        auto tot_pay       = miner_pay_from_fees + miner_pay_from_reward;
        auto voters_reward = fc::uint128(tot_pay.value);
@@ -143,7 +143,7 @@ void database::update_signing_miner(const miner_object& signing_miner, const sig
            const auto &idx = get_index_type<account_balance_index>( ).indices( ).get<by_owner>( );
            // Extracted from vote_tally_helper
            auto it = idx.find(ao.get_id( ));
-           if(idx.end( ) != it && (head_block_num( ) < VOTE_REWARD_CHECK || it->casted_vote == signing_miner.vote_id))
+           if(idx.end( ) != it)
                return it->vote_power;
            return uint64_t(0);
        };
@@ -164,7 +164,35 @@ void database::update_signing_miner(const miner_object& signing_miner, const sig
                deposit_account_pay(*it, deposit);
                tot_deposited += deposit;
            }
-           FC_ASSERT(head_block_num( ) < VOTE_REWARD_CHECK || tot_deposited <= voters_reward.to_uint64( ));
+       }
+
+       deposit_miner_pay(signing_miner, tot_pay - tot_deposited.value);
+   }
+   else
+   {
+       auto tot_pay       = miner_pay_from_fees + miner_pay_from_reward;
+       auto voters_reward = fc::uint128(tot_pay.value);
+       voters_reward *= 3;
+       voters_reward /= 5;
+
+       const auto &aix    = get_index_type<account_index>( ).indices( ).get<by_id>( );
+       const auto &idx    = get_index_type<account_balance_index>( ).indices( ).get<by_voted_miner>( );
+       const auto &_begin = idx.lower_bound(signing_miner.vote_id);
+       const auto &_end   = idx.upper_bound(signing_miner.vote_id);
+
+       fc::safe<uint64_t> tot_deposited = 0;
+       if(signing_miner.total_votes > 0)
+       {
+           auto tot_votes = fc::uint128(signing_miner.total_votes);
+           for(auto it = _begin; it != _end; ++it)
+           {
+               auto deposit_ = voters_reward * fc::uint128(it->vote_power) / tot_votes;
+               auto deposit  = deposit_.to_uint64( );
+
+               deposit_account_pay(*aix.find(it->owner), deposit);
+               tot_deposited += deposit;
+           }
+           FC_ASSERT(tot_deposited <= voters_reward.to_uint64( ));
        }
 
        deposit_miner_pay(signing_miner, tot_pay - tot_deposited.value);
