@@ -1238,17 +1238,12 @@ namespace graphene { namespace app {
            return result;
 
        auto const & vid = mit->vote_id;
-       auto const & aix = _db.get_index_type<account_index>().indices().get<by_voted_miner>();
-       auto const & abix = _db.get_index_type<account_balance_index>().indices().get<by_owner>();
+       auto const & abix = _db.get_index_type<account_balance_index>().indices().get<by_voted_miner>();
 
-       auto _begin = aix.lower_bound(vid);
-       auto _end = aix.upper_bound(vid);
+       auto _begin = abix.lower_bound(vid);
+       auto _end = abix.upper_bound(vid);
        for(auto a = _begin; a != _end; ++a)
-       {
-           auto i = abix.find(a->get_id());
-           if (i != abix.end())
-               result.push_back(*i);
-       }
+           result.push_back(*a);
 
        return result;
    }
