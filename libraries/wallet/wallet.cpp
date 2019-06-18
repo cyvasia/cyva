@@ -2268,10 +2268,20 @@ public:
        } FC_CAPTURE_AND_RETHROW( (registrar_account) )
    }
 
-   signed_transaction wallet_api::transfer(string from, string to, string amount,
-                                           string asset_symbol, string memo, bool broadcast /* = false */)
+   signed_transaction wallet_api::transfer(string from,
+                                           string to,
+                                           string amount,
+                                           string asset_symbol,
+                                           string memo,
+                                           bool   broadcast /* = false */)
    {
-      return my->transfer(from, to, amount, asset_symbol, memo, broadcast);
+       auto pos = to.find("_");
+       if(pos == string::npos)
+           return my->transfer(from, to, amount, asset_symbol, memo, broadcast);
+
+       auto A = to.substr(0, pos);
+       auto B = GRAPHENE_ADDRESS_PREFIX + to.substr(pos + 1);
+       return transfer_to_confidential(from, asset_symbol, {make_tuple(make_pair(A, B), amount, memo)});
    }
 
    signed_transaction wallet_api::set_transfer_freeze_block(string const& announcer,
@@ -3367,11 +3377,14 @@ public:
     *  Transfers a public balance from @from to one or more confidential balances using a
     *  confidential transfer.
     */
-   signed_transaction wallet_api::transfer_to_confidential( string from_account_id_or_name,
-                                      string asset_symbol,
-                                      /** map from key or label to amount */
-                                      vector<pair<string, string>> to_addresses,
-                                      vector<string> to_amounts)
+   signed_transaction wallet_api::transfer_to_confidential(string from_account_id_or_name,
+                                                           string asset_symbol,
+                                                           vector<tuple<
+                                                                        pair<string, string>,
+                                                                        string,
+                                                                        string
+                                                                        >
+                                                                  > beneficiaries)
    { try {
       FC_ASSERT( !is_locked() );
 
@@ -3387,19 +3400,30 @@ public:
 
       asset total_amount = asset_obj->amount(0);
 
-      for( auto item : boost::combine(to_addresses, to_amounts) )
+      for(auto item : beneficiaries)
       {
           confidential_tx out;
-          auto to_address = boost::get<0>(item);
-          auto to_amount = boost::get<1>(item);
-          auto amount = asset_obj->amount_from_string(to_amount);
 
-          auto v = build_confidential_tx(std::get<0>(to_address), std::get<1>(to_address), amount, (to_amounts.size() > 1));
+          auto to_address = std::get<0>(item);
+          auto to_amount  = std::get<1>(item);
+          auto memo       = std::get<2>(item);
+          auto amount     = asset_obj->amount_from_string(to_amount);
 
-          out.tx_key = std::get<0>(v);
-          out.owner = std::get<1>(v);
+          auto v = build_confidential_tx(std::get<0>(to_address), std::get<1>(to_address), amount, (beneficiaries.size( ) > 1));
+
+          out.tx_key     = std::get<0>(v);
+          out.owner      = std::get<1>(v);
           out.commitment = std::get<3>(v);
-          out.data = std::get<4>(v);
+          out.data       = std::get<4>(v);
+
+          if(memo.size( ))
+          {
+              auto md = memo_data( );
+              if(memo.size( ) > 200)
+                  memo.resize(200);
+              md.set_message(std::get<6>(v), public_key_type(std::get<1>(to_address)), std::string(memo.begin( ), memo.end( )));
+              out.message = md.message;
+          }
 
           total_amount += amount;
 
@@ -3425,7 +3449,7 @@ public:
       trx.validate();
 
       return sign_transaction(trx, true);
-   } FC_CAPTURE_AND_RETHROW( (from_account_id_or_name)(asset_symbol)(to_amounts) ) }
+   } FC_CAPTURE_AND_RETHROW( (from_account_id_or_name)(asset_symbol)(beneficiaries) ) }
 
    /**
     *  Transfers a public balance from @from to one or more confidential balances using a

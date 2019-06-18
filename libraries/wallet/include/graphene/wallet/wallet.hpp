@@ -1246,16 +1246,19 @@ namespace graphene { namespace wallet {
           *  confidential transfer.
           */
          signed_transaction transfer_to_confidential(string from_account_id_or_name,
-                               string asset_symbol,
-                               /** map from key or label to amount */
-                               vector<pair<string, string> > to_addresses,
-                               vector<string> to_amounts);
+                                                     string asset_symbol,
+                                                     vector<
+                                                         tuple<pair<string, string>,
+                                                               string,
+                                                               string
+                                                               >
+                                                         > beneficiaries);
 
-         signed_transaction transfer_from_confidential(const string &A, const string &B,
-                                  string asset_symbol,
-                                  /** map from key or label to amount */
-                                  vector<pair<string, string>> to_addresses,
-                                  vector<string> to_amounts);
+         signed_transaction transfer_from_confidential(const string &               A,
+                                                       const string &               B,
+                                                       string                       asset_symbol,
+                                                       vector<pair<string, string>> to_addresses,
+                                                       vector<string>               to_amounts);
 
          vector<confidential_tx_object> get_confidential_transactions(const string &a, const string &B , bool unspent)const;
          asset get_confidential_balance(const string &A, const string &B, string asset_symbol) const;

@@ -344,7 +344,7 @@ FC_REFLECT( graphene::chain::transfer_from_blind_operation::fee_parameters_type,
 FC_REFLECT( graphene::chain::blind_transfer_operation::fee_parameters_type, (fee)(price_per_output) )
 
 FC_REFLECT( graphene::chain::confidential_tx,
-            (commitment)(data)(range_proof)(owner)(tx_key) )
+            (commitment)(data)(range_proof)(owner)(tx_key)(message) )
 FC_REFLECT( graphene::chain::transfer_to_confidential_operation,
             (fee)(amount)(from)(blinding_factor)(outputs) )
 FC_REFLECT( graphene::chain::transfer_to_confidential_operation::fee_parameters_type, (fee)(price_per_output) )
