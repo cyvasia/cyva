@@ -3336,10 +3336,7 @@ public:
 
    vector<confidential_tx_object> wallet_api::get_confidential_transactions(const string &A, const string &B, bool unspent) const
    {
-       FC_ASSERT( !is_locked() );
-       auto Ap = public_key_type(A);
-       auto As = my->_keys[Ap];
-       return my->_remote_db->get_confidential_transactions(As, B, unspent);
+       return my->_remote_db->get_confidential_transactions(A, B, unspent);
    }
 
    asset wallet_api::get_confidential_balance(const string &A, const string &B, string asset_symbol) const

@@ -1600,13 +1600,17 @@ namespace graphene { namespace app {
 
    vector<confidential_tx_object> database_api::get_confidential_transactions(const string &a, const string &B, bool unspent) const
    {
-       try{
+       try
+       {
            auto B_ = public_key_type(B);
-           auto a_ = *utilities::wif_to_key(a);
-           return my->get_confidential_transactions(a_, B_, unspent);
-       } catch(...) {
-           return {};
+           auto a_ = utilities::wif_to_key(a);
+           if(a_)
+               return my->get_confidential_transactions(*a_, B_, unspent);
        }
+       catch(...)
+       {
+       }
+       return {};
    }
 
    vector<confidential_tx_object> database_api_impl::get_confidential_transactions(fc::ecc::private_key const &a, const fc::ecc::public_key &B, bool unspent)const

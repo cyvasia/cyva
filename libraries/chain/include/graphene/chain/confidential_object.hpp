@@ -121,4 +121,4 @@ typedef generic_index<confidential_tx_object, confidential_tx_object_multi_index
 
 } } // graphene::chain
 
-FC_REFLECT_DERIVED( graphene::chain::confidential_tx_object, (graphene::db::object), (commitment)(tx_key)(owner)(data)(range_proof)(unspent)(timestamp)(block_number) )
+FC_REFLECT_DERIVED( graphene::chain::confidential_tx_object, (graphene::db::object), (commitment)(tx_key)(owner)(data)(range_proof)(message)(unspent)(timestamp)(block_number) )
