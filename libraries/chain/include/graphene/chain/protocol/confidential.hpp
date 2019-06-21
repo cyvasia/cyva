@@ -270,15 +270,15 @@ struct confidential_tx_x
     vector<char>               message;
 };
 
-using confidential_tx_extension_t = static_variant<void_t, range_proof_type, confidential_tx_x>;
+typedef static_variant<void_result, range_proof_type, confidential_tx_x> confidential_tx_extension;
 
 struct confidential_tx
 {
-    fc::ecc::commitment_type    commitment;
-    public_key_type             tx_key;
-    public_key_type             owner;
-    vector<char>                data;
-    confidential_tx_extension_t extension;
+    fc::ecc::commitment_type  commitment;
+    public_key_type           tx_key;
+    public_key_type           owner;
+    vector<char>              data;
+    confidential_tx_extension extension;
 };
 
 struct transfer_to_confidential_operation : public base_operation
@@ -349,7 +349,7 @@ FC_REFLECT( graphene::chain::transfer_to_blind_operation::fee_parameters_type, (
 FC_REFLECT( graphene::chain::transfer_from_blind_operation::fee_parameters_type, (fee) )
 FC_REFLECT( graphene::chain::blind_transfer_operation::fee_parameters_type, (fee)(price_per_output) )
 
-FC_REFLECT_TYPENAME( graphene::chain::confidential_tx_extension_t )
+FC_REFLECT_TYPENAME( graphene::chain::confidential_tx_extension )
 FC_REFLECT( graphene::chain::confidential_tx_x,
            (range_proof)(message) )
 FC_REFLECT( graphene::chain::confidential_tx,
