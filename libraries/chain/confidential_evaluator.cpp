@@ -183,13 +183,27 @@ void_result transfer_to_confidential_evaluator::do_apply( const operation_type& 
    });
    for( const auto& out : op.outputs )
    {
+       FC_ASSERT(out.commitment != fc::ecc::commitment_type( ), "commitment cannot be 0");
+       optional<range_proof_type> range_proof;
+       vector<char>               message {};
+       if(2 == out.extension.which( ))
+       {
+           auto ext    = out.extension.get<confidential_tx_x>( );
+           range_proof = ext.range_proof;
+           message     = ext.message;
+       }
+       else if(1 == out.extension.which( ))
+       {
+           range_proof = out.extension.get<range_proof_type>( );
+       }
+
        db( ).create<confidential_tx_object>([&](confidential_tx_object &obj) {
            obj.commitment   = out.commitment;
            obj.tx_key       = out.tx_key;
            obj.owner        = out.owner;
-           obj.range_proof  = out.range_proof;
+           obj.range_proof  = range_proof;
            obj.data         = out.data;
-           obj.message      = out.message;
+           obj.message      = message;
            obj.unspent      = true;
            obj.timestamp    = db( ).head_block_time( );
            obj.block_number = db( ).head_block_num( );
@@ -274,17 +288,73 @@ void_result transfer_from_confidential_evaluator::do_apply( const operation_type
    }
    for(const auto& out : op.outputs)
    {
-       db( ).create<confidential_tx_object>([&](confidential_tx_object &obj) {
-           obj.commitment   = out.commitment;
-           obj.tx_key       = out.tx_key;
-           obj.owner        = out.owner;
-           obj.range_proof  = out.range_proof;
-           obj.data         = out.data;
-           obj.message      = out.message;
-           obj.unspent      = true;
-           obj.timestamp    = db( ).head_block_time( );
-           obj.block_number = db( ).head_block_num( );
-       });
+       if(out.commitment != fc::ecc::commitment_type())
+       {
+           optional<range_proof_type> range_proof;
+           vector<char> message{};
+           if(2 == out.extension.which( ))
+           {
+               auto ext    = out.extension.get<confidential_tx_x>( );
+               range_proof = ext.range_proof;
+               message     = ext.message;
+           }
+           else if(1 == out.extension.which( ))
+           {
+               range_proof = out.extension.get<range_proof_type>( );
+           }
+           db( ).create<confidential_tx_object>([&](confidential_tx_object &obj) {
+               obj.commitment   = out.commitment;
+               obj.tx_key       = out.tx_key;
+               obj.owner        = out.owner;
+               obj.range_proof  = range_proof;
+               obj.data         = out.data;
+               obj.message      = message;
+               obj.unspent      = true;
+               obj.timestamp    = db( ).head_block_time( );
+               obj.block_number = db( ).head_block_num( );
+           });
+       }
+       else
+       {
+           auto to = out.owner;
+           std::string to_name(to);
+
+           auto itr_name = ai.find(to_name);
+           FC_ASSERT(itr_name != ai.end(), "address not found", ("address", *itr_name));
+
+
+           uint64_t value = 0;
+           uint64_t unit = 0;
+           std::string str(out.data.begin(), out.data.end());
+           std::stringstream ss(str);
+           fc::raw::unpack(ss, value);
+           fc::raw::unpack(ss, unit);
+           asset amount{share_type(value), asset_id_type(unit)};
+
+           db().adjust_balance(itr_name->get_id(), amount);
+           db().modify( add, [&]( asset_dynamic_data_object& obj )
+                       {
+                           obj.confidential_supply -= amount.amount;
+                           FC_ASSERT( obj.confidential_supply >= 0 );
+                       });
+           auto ext = out.extension.get<confidential_tx_x>();
+           db().create<transaction_detail_object>([&](transaction_detail_object& obj)
+                                                  {
+                                                      obj.m_operation_type = (uint8_t)transaction_detail_object::confidential_transfer;
+
+                                                      obj.m_from_name = std::string(out.tx_key);
+                                                      obj.m_to_name = to_name;
+                                                      obj.m_to_account = itr_name->get_id();
+                                                      obj.m_transaction_amount = amount;
+                                                      obj.m_transaction_fee = asset(0, op.fee.asset_id);
+                                                      obj.m_str_description = "confidential transfer";
+                                                      memo_data md;
+                                                      md.message = ext.message;
+                                                      obj.m_transaction_encrypted_memo = md;
+                                                      obj.m_timestamp = db().head_block_time();
+                                                      obj.m_block_number = db().head_block_num();
+                                                  });
+       }
    }
    return void_result();
 } FC_CAPTURE_AND_RETHROW( (op) ) }

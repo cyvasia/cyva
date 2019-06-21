@@ -167,8 +167,14 @@ void transfer_to_confidential_operation::validate()const
    FC_ASSERT( std::is_sorted(outputs.begin(), outputs.end(), [](const confidential_tx &a, const confidential_tx &b){ return a.commitment < b.commitment; }),
               "all outputs must be sorted by commitment id" );
    for(const auto &out : outputs)
-       if(out.message)
-           FC_ASSERT(out.message->size( ) <= 256, "message is too long");
+   {
+       if (2 == out.extension.which())
+       {
+           auto ext = out.extension.get<confidential_tx_x>();
+           if(ext.message.size())
+               FC_ASSERT(ext.message.size( ) <= 256, "message is too long");
+       }
+   }
 
    auto in_commit = fc::ecc::blind(blinding_factor, uint64_t(amount.asset_id), amount.amount.value);
 
@@ -182,7 +188,22 @@ void transfer_to_confidential_operation::validate()const
    {
       for( auto out : outputs )
       {
-         auto info = fc::ecc::range_get_info( *out.range_proof );
+          FC_ASSERT(out.commitment != fc::ecc::commitment_type( ), "commitment cannot be 0");
+          range_proof_type range_proof;
+          if (2 == out.extension.which())
+          {
+              auto ext = out.extension.get<confidential_tx_x>();
+              range_proof = *ext.range_proof;
+          }
+          else if (1 == out.extension.which())
+          {
+              range_proof = out.extension.get<range_proof_type>();
+          }
+          else
+          {
+              FC_ASSERT(false, "missing range proof");
+          }
+         auto info = fc::ecc::range_get_info( range_proof );
          FC_ASSERT( info.max_value <= GRAPHENE_MAX_SHARE_SUPPLY );
       }
    }
@@ -208,8 +229,14 @@ void transfer_from_confidential_operation::validate()const
    for(auto && a : amount)
        FC_ASSERT( a.amount > 0, "non positive amount");
    for(const auto &out : outputs)
-       if(out.message)
-           FC_ASSERT(out.message->size( ) <= 256, "message is too long");
+   {
+       if (2 == out.extension.which())
+       {
+           auto ext = out.extension.get<confidential_tx_x>();
+           if(ext.message.size())
+               FC_ASSERT(ext.message.size( ) <= 256, "message is too long");
+       }
+   }
 
    vector<commitment_type> in_commits(inputs.size());
    vector<commitment_type> out_commits(outputs.size());
@@ -226,11 +253,26 @@ void transfer_from_confidential_operation::validate()const
    FC_ASSERT( std::is_sorted(in_commits.begin(), in_commits.end()), "all inputs must be sorted by commitment");
    FC_ASSERT( std::is_sorted(out_commits.begin(), out_commits.end()), "all outputs must be sorted by commitment");
 
-   if( outputs.size() > 1 )
+   auto ct_n = std::count_if(outputs.begin(), outputs.end(), [](const confidential_tx & a){ return a.commitment != fc::ecc::commitment_type(); });
+   if( ct_n > 1 )
    {
        for( auto out : outputs )
        {
-           auto info = fc::ecc::range_get_info( *out.range_proof );
+           range_proof_type range_proof;
+           if (2 == out.extension.which())
+           {
+               auto ext = out.extension.get<confidential_tx_x>();
+               range_proof = *ext.range_proof;
+           }
+           else if (1 == out.extension.which())
+           {
+               range_proof = out.extension.get<range_proof_type>();
+           }
+           else
+           {
+               FC_ASSERT(false, "missing range proof");
+           }
+           auto info = fc::ecc::range_get_info( range_proof );
            FC_ASSERT( info.max_value <= GRAPHENE_MAX_SHARE_SUPPLY );
        }
    }

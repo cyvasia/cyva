@@ -264,15 +264,21 @@ struct blind_transfer_operation : public base_operation
  *  @ingroup confidential
  *  @brief Converts public account balance to a confidential balance
  */
+struct confidential_tx_x
+{
+    optional<range_proof_type> range_proof;
+    vector<char>               message;
+};
+
+using confidential_tx_extension_t = static_variant<void_t, range_proof_type, confidential_tx_x>;
 
 struct confidential_tx
 {
-   fc::ecc::commitment_type                commitment;
-   public_key_type                         tx_key;
-   public_key_type                         owner;
-   vector<char>                            data;
-   optional<range_proof_type>              range_proof; ///< only required if there is more than one blind output
-   optional<vector<char>>                  message;
+    fc::ecc::commitment_type    commitment;
+    public_key_type             tx_key;
+    public_key_type             owner;
+    vector<char>                data;
+    confidential_tx_extension_t extension;
 };
 
 struct transfer_to_confidential_operation : public base_operation
@@ -343,8 +349,11 @@ FC_REFLECT( graphene::chain::transfer_to_blind_operation::fee_parameters_type, (
 FC_REFLECT( graphene::chain::transfer_from_blind_operation::fee_parameters_type, (fee) )
 FC_REFLECT( graphene::chain::blind_transfer_operation::fee_parameters_type, (fee)(price_per_output) )
 
+FC_REFLECT_TYPENAME( graphene::chain::confidential_tx_extension_t )
+FC_REFLECT( graphene::chain::confidential_tx_x,
+           (range_proof)(message) )
 FC_REFLECT( graphene::chain::confidential_tx,
-            (commitment)(data)(range_proof)(owner)(tx_key) )
+            (commitment)(data)(extension)(owner)(tx_key) )
 FC_REFLECT( graphene::chain::transfer_to_confidential_operation,
             (fee)(amount)(from)(blinding_factor)(outputs) )
 FC_REFLECT( graphene::chain::transfer_to_confidential_operation::fee_parameters_type, (fee)(price_per_output) )
