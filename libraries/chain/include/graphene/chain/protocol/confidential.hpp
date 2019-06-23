@@ -266,8 +266,8 @@ struct blind_transfer_operation : public base_operation
  */
 struct confidential_tx_x
 {
-    optional<range_proof_type> range_proof;
-    vector<char>               message;
+    range_proof_type range_proof;
+    vector<char>     message;
 };
 
 struct empty {};

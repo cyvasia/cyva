@@ -184,8 +184,8 @@ void_result transfer_to_confidential_evaluator::do_apply( const operation_type& 
    for( const auto& out : op.outputs )
    {
        FC_ASSERT(out.commitment != fc::ecc::commitment_type( ), "commitment cannot be 0");
-       optional<range_proof_type> range_proof;
-       vector<char>               message {};
+       range_proof_type range_proof{};
+       vector<char>     message{};
        if(2 == out.extension.which( ))
        {
            auto ext    = out.extension.get<confidential_tx_x>( );
@@ -195,8 +195,6 @@ void_result transfer_to_confidential_evaluator::do_apply( const operation_type& 
        else if(1 == out.extension.which( ))
        {
            range_proof = out.extension.get<range_proof_type>( );
-           if(not range_proof->size())
-               range_proof.reset();
        }
 
        db( ).create<confidential_tx_object>([&](confidential_tx_object &obj) {
@@ -276,15 +274,15 @@ void_result transfer_from_confidential_evaluator::do_apply( const operation_type
 
       db().modify( *itr, [&]( confidential_tx_object& obj ){
           obj.unspent = false;
-          obj.range_proof.reset();
+          obj.range_proof.clear();
       });
    }
    for(const auto& out : outputs)
    {
        if(out.commitment != fc::ecc::commitment_type())
        {
-           optional<range_proof_type> range_proof;
-           vector<char> message{};
+           range_proof_type range_proof{};
+           vector<char>     message{};
            if(2 == out.extension.which( ))
            {
                auto ext    = out.extension.get<confidential_tx_x>( );
@@ -294,8 +292,6 @@ void_result transfer_from_confidential_evaluator::do_apply( const operation_type
            else if(1 == out.extension.which( ))
            {
                range_proof = out.extension.get<range_proof_type>( );
-               if(not range_proof->size())
-                   range_proof.reset();
            }
 
            db( ).create<confidential_tx_object>([&](confidential_tx_object &obj) {

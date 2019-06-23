@@ -193,7 +193,7 @@ void transfer_to_confidential_operation::validate()const
           if (2 == out.extension.which())
           {
               auto ext = out.extension.get<confidential_tx_x>();
-              range_proof = *ext.range_proof;
+              range_proof = ext.range_proof;
           }
           else if (1 == out.extension.which())
           {
@@ -274,7 +274,7 @@ void transfer_from_confidential_operation::validate()const
            if (2 == out.extension.which())
            {
                auto ext = out.extension.get<confidential_tx_x>();
-               range_proof = *ext.range_proof;
+               range_proof = ext.range_proof;
            }
            else if (1 == out.extension.which())
            {

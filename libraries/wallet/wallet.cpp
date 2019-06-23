@@ -3413,21 +3413,23 @@ public:
           out.commitment = std::get<3>(v);
           out.data       = std::get<4>(v);
 
-          confidential_tx_x ext;
           if(memo.size( ))
           {
+              confidential_tx_x ext;
               auto md = memo_data( );
               if(memo.size( ) > 200)
                   memo.resize(200);
               md.set_message(std::get<6>(v), public_key_type(std::get<1>(to_address)), std::string(memo.begin( ), memo.end( )));
               ext.message = md.message;
+              if(std::get<5>(v))
+                  ext.range_proof = *std::get<5>(v);
+              out.extension = ext;
           }
+          else if(std::get<5>(v))
+              out.extension = *std::get<5>(v);
 
           total_amount += amount;
 
-          if(std::get<5>(v))
-              ext.range_proof = *std::get<5>(v);
-          out.extension = ext;
           blinding_factors.push_back(std::get<2>(v));
 
           op.outputs.push_back(out);
@@ -3518,13 +3520,13 @@ public:
                {
                    confidential_tx_x ext;
                    ext.message = tx.message;
-                   if (tx.range_proof && tx.range_proof->size())
+                   if (not tx.range_proof.empty())
                        ext.range_proof = tx.range_proof;
                    in.extension = ext;
                }
-               else if (tx.range_proof && tx.range_proof->size())
+               else if (not tx.range_proof.empty())
                {
-                   in.extension = *tx.range_proof;
+                   in.extension = tx.range_proof;
                }
 
                auto shared_secret = owner_private_b.get_shared_secret(in.tx_key);
