@@ -242,34 +242,25 @@ void_result transfer_from_confidential_evaluator::do_apply( const operation_type
    const auto& add = op.fee.asset_id(db()).dynamic_asset_data_id(db());  // verify fee is a legit asset
    const auto& ai = db().get_index_type<account_index>().indices().get<by_name>();
 
-   for (auto b : boost::combine(op.to, op.amount))
+   auto outputs = op.outputs;
+   for(auto b : boost::combine(op.to, op.amount))
    {
-       auto to = boost::get<0>(b);
-       std::string to_name(to);
+       confidential_tx c;
+       auto            to = boost::get<0>(b);
 
-       auto itr_name = ai.find(to_name);
-       FC_ASSERT(itr_name != ai.end(), "address not found", ("address", *itr_name));
+       c.commitment = commitment_type( );
+       c.owner      = to;
+       vector<char> data;
+       data.resize(16);
+       memcpy(&data[0], &boost::get<1>(b).amount.value, 8);
+       auto unit = uint64_t(boost::get<1>(b).asset_id);
+       memcpy(&data[8], &unit, 8);
+       c.data   = data;
+       c.tx_key = c.owner;
 
-       db().adjust_balance(itr_name->get_id(), boost::get<1>(b));
-       db().modify( add, [&]( asset_dynamic_data_object& obj )
-       {
-          obj.confidential_supply -= boost::get<1>(b).amount;
-          FC_ASSERT( obj.confidential_supply >= 0 );
-       });
-       db().create<transaction_detail_object>([&](transaction_detail_object& obj)
-                                              {
-                                                  obj.m_operation_type = (uint8_t)transaction_detail_object::confidential_transfer;
-
-                                                  obj.m_from_account = GRAPHENE_NULL_ACCOUNT;
-                                                  obj.m_to_account = itr_name->get_id();
-                                                  obj.m_transaction_amount = boost::get<1>(b);
-                                                  obj.m_transaction_fee = asset(0, op.fee.asset_id);
-                                                  obj.m_str_description = "confidential transfer";
-                                                  obj.m_timestamp = db().head_block_time();
-                                                  obj.m_block_number = db().head_block_num();
-                                              });
-
+       outputs.push_back(c);
    }
+
    db().adjust_balance(op.fee_payer(), op.fee.amount);
    db().modify( add, [&]( asset_dynamic_data_object& obj )
    {
@@ -288,7 +279,7 @@ void_result transfer_from_confidential_evaluator::do_apply( const operation_type
           obj.range_proof.reset();
       });
    }
-   for(const auto& out : op.outputs)
+   for(const auto& out : outputs)
    {
        if(out.commitment != fc::ecc::commitment_type())
        {
