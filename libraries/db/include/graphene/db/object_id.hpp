@@ -81,6 +81,7 @@ namespace graphene { namespace db {
             *this = object_id_type(s, t, i);
          }
       }
+      explicit object_id_type(uint64_t v) { number = v; }
 
       uint8_t  space()const       { return number >> 56;              }
       uint8_t  type()const        { return number >> 48 & 0x00ff;     }

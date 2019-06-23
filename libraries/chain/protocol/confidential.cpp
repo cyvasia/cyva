@@ -243,6 +243,18 @@ void transfer_from_confidential_operation::validate()const
 
    asset                 public_volume = fee;
    public_volume = std::accumulate(amount.begin(), amount.end(), public_volume);
+   for( auto out : outputs )
+       if(out.commitment == fc::ecc::commitment_type())
+       {
+           uint64_t value = 0;
+           uint64_t unit = 0;
+           memcpy(&value, &out.data[0], 8);
+           memcpy(&unit, &out.data[8], 8);
+           asset amount{share_type(value), object_id_type(unit)};
+           public_volume += amount;
+       }
+
+
    auto pub_commit = fc::ecc::blind(blinding_factor, uint64_t(public_volume.asset_id), public_volume.amount.value);
 
    std::transform(inputs.begin(), inputs.end(), in_commits.begin(), [](const confidential_tx & a){ return a.commitment; });
@@ -278,9 +290,9 @@ void transfer_from_confidential_operation::validate()const
    }
 
    out_commits.push_back(pub_commit);
-
-   FC_ASSERT( fc::ecc::verify_sum(in_commits, out_commits, 0), "imbalance");
-
+   vector<commitment_type> out_commits_;
+   std::copy_if(out_commits.begin(), out_commits.end(), std::back_inserter(out_commits_), [](const commitment_type & c){ return c != fc::ecc::commitment_type(); });
+   FC_ASSERT( fc::ecc::verify_sum(in_commits, out_commits_, 0), "imbalance");
 
 } FC_CAPTURE_AND_RETHROW( (*this) ) }
 

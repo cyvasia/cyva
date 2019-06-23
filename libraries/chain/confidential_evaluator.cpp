@@ -195,6 +195,8 @@ void_result transfer_to_confidential_evaluator::do_apply( const operation_type& 
        else if(1 == out.extension.which( ))
        {
            range_proof = out.extension.get<range_proof_type>( );
+           if(not range_proof->size())
+               range_proof.reset();
        }
 
        db( ).create<confidential_tx_object>([&](confidential_tx_object &obj) {
@@ -301,7 +303,10 @@ void_result transfer_from_confidential_evaluator::do_apply( const operation_type
            else if(1 == out.extension.which( ))
            {
                range_proof = out.extension.get<range_proof_type>( );
+               if(not range_proof->size())
+                   range_proof.reset();
            }
+
            db( ).create<confidential_tx_object>([&](confidential_tx_object &obj) {
                obj.commitment   = out.commitment;
                obj.tx_key       = out.tx_key;
@@ -322,14 +327,11 @@ void_result transfer_from_confidential_evaluator::do_apply( const operation_type
            auto itr_name = ai.find(to_name);
            FC_ASSERT(itr_name != ai.end(), "address not found", ("address", *itr_name));
 
-
            uint64_t value = 0;
-           uint64_t unit = 0;
-           std::string str(out.data.begin(), out.data.end());
-           std::stringstream ss(str);
-           fc::raw::unpack(ss, value);
-           fc::raw::unpack(ss, unit);
-           asset amount{share_type(value), asset_id_type(unit)};
+           uint64_t unit  = 0;
+           memcpy(&value, &out.data[0], 8);
+           memcpy(&unit, &out.data[8], 8);
+           asset amount{share_type(value), object_id_type(unit)};
 
            db().adjust_balance(itr_name->get_id(), amount);
            db().modify( add, [&]( asset_dynamic_data_object& obj )
@@ -337,7 +339,7 @@ void_result transfer_from_confidential_evaluator::do_apply( const operation_type
                            obj.confidential_supply -= amount.amount;
                            FC_ASSERT( obj.confidential_supply >= 0 );
                        });
-           auto ext = out.extension.get<confidential_tx_x>();
+
            db().create<transaction_detail_object>([&](transaction_detail_object& obj)
                                                   {
                                                       obj.m_operation_type = (uint8_t)transaction_detail_object::confidential_transfer;
@@ -348,9 +350,14 @@ void_result transfer_from_confidential_evaluator::do_apply( const operation_type
                                                       obj.m_transaction_amount = amount;
                                                       obj.m_transaction_fee = asset(0, op.fee.asset_id);
                                                       obj.m_str_description = "confidential transfer";
-                                                      memo_data md;
-                                                      md.message = ext.message;
-                                                      obj.m_transaction_encrypted_memo = md;
+                                                      if(2 == out.extension.which())
+                                                      {
+                                                          auto ext = out.extension.get<confidential_tx_x>();
+                                                          memo_data md;
+                                                          string message(ext.message.begin(), ext.message.end());
+                                                          md.set_message(fc::ecc::private_key(), fc::ecc::public_key(), message);
+                                                          obj.m_transaction_encrypted_memo = md;
+                                                      }
                                                       obj.m_timestamp = db().head_block_time();
                                                       obj.m_block_number = db().head_block_num();
                                                   });
