@@ -468,7 +468,7 @@ namespace graphene { namespace app {
           * @return Map of miner names to corresponding IDs
           * @ingroup DatabaseAPI
           */
-         map<string, miner_object> lookup_miner_accounts(const string& lower_bound_name, uint32_t limit)const;
+         map<string, miner_object_ex> lookup_miner_accounts(const string& lower_bound_name, uint32_t limit)const;
 
          /**
           * @brief Get the total number of miners registered with the blockchain

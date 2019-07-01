@@ -2487,7 +2487,7 @@ public:
       lock();
    }
 
-   map<string, miner_object> wallet_api::list_miners(const string& lowerbound, uint32_t limit)
+   map<string, miner_object_ex> wallet_api::list_miners(const string& lowerbound, uint32_t limit)
    {
       return my->_remote_db->lookup_miner_accounts(lowerbound, limit);
    }

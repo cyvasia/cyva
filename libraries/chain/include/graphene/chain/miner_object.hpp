@@ -23,6 +23,8 @@
  */
 #pragma once
 #include <graphene/chain/protocol/asset.hpp>
+#include <graphene/chain/protocol/vote.hpp>
+
 #include <graphene/db/object.hpp>
 #include <graphene/db/generic_index.hpp>
 
@@ -47,7 +49,7 @@ namespace graphene { namespace chain {
          int64_t          total_missed = 0;
          uint32_t         last_confirmed_block_num = 0;
 
-         miner_object() : vote_id(vote_id_type::miner) {}
+         miner_object(vote_id_type const & v_type = vote_id_type::miner) : vote_id(v_type) {}
    };
 
    struct by_account;
@@ -68,6 +70,12 @@ namespace graphene { namespace chain {
       >
    >;
    using miner_index = generic_index<miner_object, miner_multi_index_type>;
+
+   struct miner_object_ex : public miner_object
+   {
+       miner_object_ex(miner_object const &base = miner_object()) : miner_object::miner_object{base} {}
+       bool active = false;
+   };
 } } // graphene::chain
 
 FC_REFLECT_DERIVED( graphene::chain::miner_object, (graphene::db::object),
@@ -80,4 +88,8 @@ FC_REFLECT_DERIVED( graphene::chain::miner_object, (graphene::db::object),
                     (url) 
                     (total_missed)
                     (last_confirmed_block_num)
+                  )
+
+FC_REFLECT_DERIVED( graphene::chain::miner_object_ex, (graphene::chain::miner_object),
+                    (active)
                   )

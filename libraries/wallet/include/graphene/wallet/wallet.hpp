@@ -585,7 +585,7 @@ namespace graphene { namespace wallet {
           * @returns a list of miners mapping miner names to miner ids
           * @ingroup WalletCLI
           */
-         map<string,miner_object>       list_miners(const string& lowerbound, uint32_t limit);
+         map<string, miner_object_ex> list_miners(const string& lowerbound, uint32_t limit);
 
          /**
           * s@brief Returns information about the given miner.
