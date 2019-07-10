@@ -160,7 +160,7 @@ stealth_confirmation::stealth_confirmation( const std::string& base58 )
 
 
 void transfer_to_confidential_operation::validate()const
-{
+{ try {
    FC_ASSERT( fee.amount >= 0 );
    FC_ASSERT( amount.amount > 0 );
    FC_ASSERT( outputs.size(), "there must be at least one output" );
@@ -207,7 +207,7 @@ void transfer_to_confidential_operation::validate()const
          FC_ASSERT( info.max_value <= GRAPHENE_MAX_SHARE_SUPPLY );
       }
    }
-}
+} FC_CAPTURE_AND_RETHROW( (*this) ) }
 
 share_type transfer_to_confidential_operation::calculate_fee( const fee_parameters_type& k )const
 {
