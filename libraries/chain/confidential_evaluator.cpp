@@ -183,13 +183,27 @@ void_result transfer_to_confidential_evaluator::do_apply( const operation_type& 
    });
    for( const auto& out : op.outputs )
    {
+       FC_ASSERT(out.commitment != fc::ecc::commitment_type( ), "commitment cannot be 0");
+       range_proof_type range_proof{};
+       vector<char>     message{};
+       if(2 == out.extension.which( ))
+       {
+           auto ext    = out.extension.get<confidential_tx_x>( );
+           range_proof = ext.range_proof;
+           message     = ext.message;
+       }
+       else if(1 == out.extension.which( ))
+       {
+           range_proof = out.extension.get<range_proof_type>( );
+       }
+
        db( ).create<confidential_tx_object>([&](confidential_tx_object &obj) {
            obj.commitment   = out.commitment;
            obj.tx_key       = out.tx_key;
            obj.owner        = out.owner;
-           obj.range_proof  = out.range_proof;
+           obj.range_proof  = range_proof;
            obj.data         = out.data;
-           obj.message      = out.message;
+           obj.message      = message;
            obj.unspent      = true;
            obj.timestamp    = db( ).head_block_time( );
            obj.block_number = db( ).head_block_num( );
@@ -226,34 +240,25 @@ void_result transfer_from_confidential_evaluator::do_apply( const operation_type
    const auto& add = op.fee.asset_id(db()).dynamic_asset_data_id(db());  // verify fee is a legit asset
    const auto& ai = db().get_index_type<account_index>().indices().get<by_name>();
 
-   for (auto b : boost::combine(op.to, op.amount))
+   auto outputs = op.outputs;
+   for(auto b : boost::combine(op.to, op.amount))
    {
-       auto to = boost::get<0>(b);
-       std::string to_name(to);
+       confidential_tx c;
+       auto            to = boost::get<0>(b);
 
-       auto itr_name = ai.find(to_name);
-       FC_ASSERT(itr_name != ai.end(), "address not found", ("address", *itr_name));
+       c.commitment = commitment_type( );
+       c.owner      = to;
+       vector<char> data;
+       data.resize(16);
+       memcpy(&data[0], &boost::get<1>(b).amount.value, 8);
+       auto unit = uint64_t(boost::get<1>(b).asset_id);
+       memcpy(&data[8], &unit, 8);
+       c.data   = data;
+       c.tx_key = c.owner;
 
-       db().adjust_balance(itr_name->get_id(), boost::get<1>(b));
-       db().modify( add, [&]( asset_dynamic_data_object& obj )
-       {
-          obj.confidential_supply -= boost::get<1>(b).amount;
-          FC_ASSERT( obj.confidential_supply >= 0 );
-       });
-       db().create<transaction_detail_object>([&](transaction_detail_object& obj)
-                                              {
-                                                  obj.m_operation_type = (uint8_t)transaction_detail_object::confidential_transfer;
-
-                                                  obj.m_from_account = GRAPHENE_NULL_ACCOUNT;
-                                                  obj.m_to_account = itr_name->get_id();
-                                                  obj.m_transaction_amount = boost::get<1>(b);
-                                                  obj.m_transaction_fee = asset(0, op.fee.asset_id);
-                                                  obj.m_str_description = "confidential transfer";
-                                                  obj.m_timestamp = db().head_block_time();
-                                                  obj.m_block_number = db().head_block_num();
-                                              });
-
+       outputs.push_back(c);
    }
+
    db().adjust_balance(op.fee_payer(), op.fee.amount);
    db().modify( add, [&]( asset_dynamic_data_object& obj )
    {
@@ -269,22 +274,81 @@ void_result transfer_from_confidential_evaluator::do_apply( const operation_type
 
       db().modify( *itr, [&]( confidential_tx_object& obj ){
           obj.unspent = false;
-          obj.range_proof.reset();
+          obj.range_proof.clear();
       });
    }
-   for(const auto& out : op.outputs)
+   for(const auto& out : outputs)
    {
-       db( ).create<confidential_tx_object>([&](confidential_tx_object &obj) {
-           obj.commitment   = out.commitment;
-           obj.tx_key       = out.tx_key;
-           obj.owner        = out.owner;
-           obj.range_proof  = out.range_proof;
-           obj.data         = out.data;
-           obj.message      = out.message;
-           obj.unspent      = true;
-           obj.timestamp    = db( ).head_block_time( );
-           obj.block_number = db( ).head_block_num( );
-       });
+       if(out.commitment != fc::ecc::commitment_type())
+       {
+           range_proof_type range_proof{};
+           vector<char>     message{};
+           if(2 == out.extension.which( ))
+           {
+               auto ext    = out.extension.get<confidential_tx_x>( );
+               range_proof = ext.range_proof;
+               message     = ext.message;
+           }
+           else if(1 == out.extension.which( ))
+           {
+               range_proof = out.extension.get<range_proof_type>( );
+           }
+
+           db( ).create<confidential_tx_object>([&](confidential_tx_object &obj) {
+               obj.commitment   = out.commitment;
+               obj.tx_key       = out.tx_key;
+               obj.owner        = out.owner;
+               obj.range_proof  = range_proof;
+               obj.data         = out.data;
+               obj.message      = message;
+               obj.unspent      = true;
+               obj.timestamp    = db( ).head_block_time( );
+               obj.block_number = db( ).head_block_num( );
+           });
+       }
+       else
+       {
+           auto to = out.owner;
+           std::string to_name(to);
+
+           auto itr_name = ai.find(to_name);
+           FC_ASSERT(itr_name != ai.end(), "address not found", ("address", *itr_name));
+
+           uint64_t value = 0;
+           uint64_t unit  = 0;
+           memcpy(&value, &out.data[0], 8);
+           memcpy(&unit, &out.data[8], 8);
+           asset amount{share_type(value), object_id_type(unit)};
+
+           db().adjust_balance(itr_name->get_id(), amount);
+           db().modify( add, [&]( asset_dynamic_data_object& obj )
+                       {
+                           obj.confidential_supply -= amount.amount;
+                           FC_ASSERT( obj.confidential_supply >= 0 );
+                       });
+
+           db().create<transaction_detail_object>([&](transaction_detail_object& obj)
+                                                  {
+                                                      obj.m_operation_type = (uint8_t)transaction_detail_object::confidential_transfer;
+
+                                                      obj.m_from_name = std::string(out.tx_key);
+                                                      obj.m_to_name = to_name;
+                                                      obj.m_to_account = itr_name->get_id();
+                                                      obj.m_transaction_amount = amount;
+                                                      obj.m_transaction_fee = asset(0, op.fee.asset_id);
+                                                      obj.m_str_description = "confidential transfer";
+                                                      if(2 == out.extension.which())
+                                                      {
+                                                          auto ext = out.extension.get<confidential_tx_x>();
+                                                          memo_data md;
+                                                          string message(ext.message.begin(), ext.message.end());
+                                                          md.set_message(fc::ecc::private_key(), fc::ecc::public_key(), message);
+                                                          obj.m_transaction_encrypted_memo = md;
+                                                      }
+                                                      obj.m_timestamp = db().head_block_time();
+                                                      obj.m_block_number = db().head_block_num();
+                                                  });
+       }
    }
    return void_result();
 } FC_CAPTURE_AND_RETHROW( (op) ) }

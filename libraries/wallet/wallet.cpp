@@ -3415,17 +3415,21 @@ public:
 
           if(memo.size( ))
           {
+              confidential_tx_x ext;
               auto md = memo_data( );
               if(memo.size( ) > 200)
                   memo.resize(200);
               md.set_message(std::get<6>(v), public_key_type(std::get<1>(to_address)), std::string(memo.begin( ), memo.end( )));
-              out.message = md.message;
+              ext.message = md.message;
+              if(std::get<5>(v))
+                  ext.range_proof = *std::get<5>(v);
+              out.extension = ext;
           }
+          else if(std::get<5>(v))
+              out.extension = *std::get<5>(v);
 
           total_amount += amount;
 
-          if(std::get<5>(v))
-              out.range_proof = *std::get<5>(v);
           blinding_factors.push_back(std::get<2>(v));
 
           op.outputs.push_back(out);
@@ -3452,10 +3456,14 @@ public:
     *  Transfers a public balance from @from to one or more confidential balances using a
     *  confidential transfer.
     */
-   signed_transaction wallet_api::transfer_from_confidential(string const &A, string const &B, string asset_symbol,
-                                                             /** map from key or label to amount */
-                                                             vector<pair<string, string>> to_addresses,
-                                                             vector<string>               to_amounts)
+   signed_transaction wallet_api::transfer_from_confidential(string const &A,
+                                                             string const &B,
+                                                             string        asset_symbol,
+                                                             vector<tuple<
+                                                                 pair<string, string> /* address */,
+                                                                 string /* amount */,
+                                                                 string /* memo */
+                                                                 >>        beneficiaries)
    {
        try
        {
@@ -3487,13 +3495,14 @@ public:
            vector<private_key_type> sks;
 
 
-           for(auto &&a : to_amounts)
+           for(auto &&b : beneficiaries)
            {
+               auto a      = std::get<1>(b);
                auto amount = asset_obj->amount_from_string(a);
                total_amount_out += amount;
            }
 
-           auto _atxs = get_confidential_transactions(A, B, true);
+           auto _atxs = get_confidential_transactions(As, B, true);
            FC_ASSERT(_atxs.size( ) > 0, "No confidential transactions for ${A} ${B}", ("A", A)("B", B));
 
            for(auto &&tx : _atxs)
@@ -3502,11 +3511,23 @@ public:
                    continue;
 
                confidential_tx in;
-               in.commitment  = tx.commitment;
-               in.tx_key      = tx.tx_key;
-               in.owner       = tx.owner;
-               in.range_proof = tx.range_proof;
-               in.data        = tx.data;
+               in.commitment = tx.commitment;
+               in.tx_key     = tx.tx_key;
+               in.owner      = tx.owner;
+               in.data       = tx.data;
+
+               if (tx.message.size())
+               {
+                   confidential_tx_x ext;
+                   ext.message = tx.message;
+                   if (not tx.range_proof.empty())
+                       ext.range_proof = tx.range_proof;
+                   in.extension = ext;
+               }
+               else if (not tx.range_proof.empty())
+               {
+                   in.extension = tx.range_proof;
+               }
 
                auto shared_secret = owner_private_b.get_shared_secret(in.tx_key);
                auto blind_factor  = fc::sha256::hash(shared_secret);
@@ -3520,17 +3541,18 @@ public:
 
                op.inputs.push_back(in);
 
-               if(total_amount_in > total_amount_out + base_fee + (to_amounts.size( ) + 1) * per_out)
+               if(total_amount_in > total_amount_out + base_fee + (beneficiaries.size( ) + 1) * per_out)
                {
-                   auto _change = total_amount_in - total_amount_out - (base_fee + (to_amounts.size( ) + 1) * per_out);
+                   auto _change = total_amount_in - total_amount_out - (base_fee + (beneficiaries.size( ) + 1) * per_out);
 
-                   to_addresses.push_back({A, B});
-                   to_amounts.push_back(asset_obj->amount_to_string(_change));
-
+                   beneficiaries.emplace_back(std::make_pair(A, B),
+                                              asset_obj->amount_to_string(_change),
+                                              std::string("change")
+                                              );
                    enough_balance = true;
                    break;
                }
-               else if(total_amount_in == total_amount_out + base_fee + to_amounts.size( ) * per_out)
+               else if(total_amount_in == total_amount_out + base_fee + beneficiaries.size( ) * per_out)
                {
                    enough_balance = true;
                    break;
@@ -3547,11 +3569,12 @@ public:
                sks.push_back(S);
            }
 
-           auto ct_n = std::count_if(to_addresses.begin( ), to_addresses.end( ), [](pair<string, string> const &addr) { return not addr.second.empty( ); });
-           for(auto item : boost::combine(to_addresses, to_amounts))
+           auto ct_n = std::count_if(beneficiaries.begin( ), beneficiaries.end( ), [](typename decltype(beneficiaries)::value_type const &b) { return not std::get<0>(b).second.empty( ); });
+           for(auto item : beneficiaries)
            {
-               auto to_address = boost::get<0>(item);
-               auto to_amount  = boost::get<1>(item);
+               auto to_address = std::get<0>(item);
+               auto to_amount  = std::get<1>(item);
+               auto memo       = std::get<2>(item);
                auto amount     = asset_obj->amount_from_string(to_amount);
                if(not to_address.second.empty( ))
                {
@@ -3561,11 +3584,54 @@ public:
                    out.tx_key     = std::get<0>(v);
                    out.owner      = std::get<1>(v);
                    out.commitment = std::get<3>(v);
-                   if(std::get<5>(v))
-                       out.range_proof = *std::get<5>(v);
-                   out.data = std::get<4>(v);
+                   out.data       = std::get<4>(v);
+
+                   if(memo.size( ))
+                   {
+                       confidential_tx_x ext;
+                       auto              md = memo_data( );
+                       if(memo.size( ) > 200)
+                           memo.resize(200);
+                       md.set_message(std::get<6>(v), public_key_type(std::get<1>(to_address)), std::string(memo.begin( ), memo.end( )));
+                       ext.message = md.message;
+                       if(std::get<5>(v))
+                           ext.range_proof = *std::get<5>(v);
+                       out.extension = ext;
+                   }
+                   else if(std::get<5>(v))
+                       out.extension = *std::get<5>(v);
 
                    blinding_factors_out.push_back(std::get<2>(v));
+                   op.outputs.push_back(out);
+               }
+               else if(memo.size( ))
+               {
+                   confidential_tx out;
+
+                   out.commitment = fc::ecc::commitment_type( );
+                   out.owner      = public_key_type(to_address.first);
+                   auto tx_key_s  = fc::ecc::private_key::generate( );
+                   out.tx_key     = tx_key_s.get_public_key( );
+
+                   vector<char> data;
+                   data.resize(16);
+                   memcpy(&data[0], &amount.amount.value, 8);
+                   auto unit = uint64_t(amount.asset_id);
+                   memcpy(&data[8], &unit, 8);
+
+                   out.data = data;
+
+                   // if(memo.size( ))
+                   {
+                       confidential_tx_x ext;
+                       auto              md = memo_data( );
+                       if(memo.size( ) > 200)
+                           memo.resize(200);
+                       md.set_message(tx_key_s, out.owner, std::string(memo.begin( ), memo.end( )));
+                       ext.message   = md.message;
+                       out.extension = ext;
+                   }
+
                    op.outputs.push_back(out);
                }
                else
@@ -3595,7 +3661,7 @@ public:
 
            return my->serve_cooked_transaction(trx);
        }
-       FC_CAPTURE_AND_RETHROW((A)(B)(asset_symbol)(to_amounts))
+       FC_CAPTURE_AND_RETHROW((A)(B)(asset_symbol)(beneficiaries))
    }
 } } // graphene::wallet
 

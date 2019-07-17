@@ -87,15 +87,15 @@ class confidential_tx_object : public graphene::db::abstract_object<confidential
     static const uint8_t space_id = implementation_ids;
     static const uint8_t type_id  = impl_confidential_tx_object_type;
 
-    fc::ecc::commitment_type   commitment;
-    public_key_type            tx_key;
-    public_key_type            owner;
-    vector<char>               data;
-    optional<range_proof_type> range_proof; ///< only required if there is more than one blind output
-    optional<vector<char>>     message;
-    bool                       unspent;
-    fc::time_point_sec         timestamp;
-    uint32_t                   block_number;
+    fc::ecc::commitment_type commitment;
+    public_key_type          tx_key;
+    public_key_type          owner;
+    vector<char>             data;
+    range_proof_type         range_proof;
+    vector<char>             message;
+    bool                     unspent;
+    fc::time_point_sec       timestamp;
+    uint32_t                 block_number;
 };
 
 struct by_tx;
