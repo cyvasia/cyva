@@ -35,146 +35,164 @@
 
 #include <algorithm>
 
-namespace graphene { namespace chain {
-
-void verify_authority_accounts( const database& db, const authority& a )
+namespace graphene
 {
-   const auto& chain_params = db.get_global_properties().parameters;
-   GRAPHENE_ASSERT(
-      a.num_auths() <= chain_params.maximum_authority_membership,
-      internal_verify_auth_max_auth_exceeded,
-      "Maximum authority membership exceeded" );
-   for( const auto& acnt : a.account_auths )
-   {
-      GRAPHENE_ASSERT( db.find_object( acnt.first ) != nullptr,
-         internal_verify_auth_account_not_found,
-         "Account ${a} specified in authority does not exist",
-         ("a", acnt.first) );
-   }
-}
+    namespace chain
+    {
+        void verify_authority_accounts(const database &db, const authority &a)
+        {
+            const auto &chain_params = db.get_global_properties( ).parameters;
+            GRAPHENE_ASSERT(
+                a.num_auths( ) <= chain_params.maximum_authority_membership,
+                internal_verify_auth_max_auth_exceeded,
+                "Maximum authority membership exceeded");
+            for(const auto &acnt : a.account_auths)
+            {
+                GRAPHENE_ASSERT(db.find_object(acnt.first) != nullptr,
+                                internal_verify_auth_account_not_found,
+                                "Account ${a} specified in authority does not exist",
+                                ("a", acnt.first));
+            }
+        }
 
-void verify_account_votes( const database& db, const account_options& options )
-{
-   // ensure account's votes satisfy requirements
-   // NB only the part of vote checking that requires chain state is here,
-   // the rest occurs in account_options::validate()
+        void verify_account_votes(const database &db, const account_options &options)
+        {
+            // ensure account's votes satisfy requirements
+            // NB only the part of vote checking that requires chain state is here,
+            // the rest occurs in account_options::validate()
 
-   const auto& gpo = db.get_global_properties();
-   const auto& chain_params = gpo.parameters;
+            const auto &gpo          = db.get_global_properties( );
+            const auto &chain_params = gpo.parameters;
 
-   FC_ASSERT( options.num_miner <= chain_params.maximum_miner_count,
-              "Voted for more miners than currently allowed (${c})", ("c", chain_params.maximum_miner_count) );
+            FC_ASSERT(options.num_miner <= chain_params.maximum_miner_count,
+                      "Voted for more miners than currently allowed (${c})", ("c", chain_params.maximum_miner_count));
 
-   uint32_t max_vote_id = gpo.next_available_vote_id;
-   for( auto id : options.votes )
-   {
-      FC_ASSERT( id < max_vote_id );
-   }
-
-}
-
-
-void_result account_create_evaluator::do_evaluate( const account_create_operation& op )
-{ try {
-   database& d = db();
-
-   FC_ASSERT( d.find_object(op.options.voting_account), "Invalid proxy account specified." );
-
-   try
-   {
-      verify_authority_accounts( d, op.owner );
-   }
-   GRAPHENE_RECODE_EXC( internal_verify_auth_max_auth_exceeded, account_create_max_auth_exceeded )
-   GRAPHENE_RECODE_EXC( internal_verify_auth_account_not_found, account_create_auth_account_not_found )
-
-   auto keys = op.owner.get_keys();
-   FC_ASSERT(keys.empty() == false);
-   std::string to_name(keys.front());
-
-   auto& acnt_indx = d.get_index_type<account_index>();
-   if( to_name.size() )
-   {
-      auto current_account_itr = acnt_indx.indices().get<by_name>().find( to_name );
-      FC_ASSERT( current_account_itr == acnt_indx.indices().get<by_name>().end() );
-   }
-
-   return void_result();
-} FC_CAPTURE_AND_RETHROW( (op) ) }
-
-object_id_type account_create_evaluator::do_apply( const account_create_operation& o )
-{ try {
-
-   database& d = db();
-
-   const auto& new_acnt_object = db().create<account_object>( [&]( account_object& obj ){
-         obj.registrar = o.registrar;
-
-         auto keys = o.owner.get_keys();
-         FC_ASSERT(keys.empty() == false);
-         std::string to_name(keys.front());
-
-         obj.name             = to_name;
-         obj.owner            = o.owner;
-         obj.options          = o.options;
-         obj.statistics = db().create<account_statistics_object>([&](account_statistics_object& s){s.owner = obj.id;}).id;
-   });
-
-   const auto& dynamic_properties = db().get_dynamic_global_properties();
-   db().modify(dynamic_properties, [](dynamic_global_property_object& p) {
-      ++p.accounts_registered_this_interval;
-   });
-
-   db().create<transaction_detail_object>([&o, &new_acnt_object, &d](transaction_detail_object& obj)
-                                          {
-                                             obj.m_operation_type = (uint8_t)transaction_detail_object::account_create;
-
-                                             obj.m_from_account = o.registrar;
-                                             obj.m_to_account = new_acnt_object.id;
-                                             obj.m_transaction_amount = asset();
-                                             obj.m_transaction_fee = o.fee;
-                                             obj.m_str_description = string();
-                                             obj.m_timestamp = d.head_block_time();
-                                          });
-
-   return new_acnt_object.id;
-} FC_CAPTURE_AND_RETHROW((o)) }
+            uint32_t max_vote_id = gpo.next_available_vote_id;
+            for(auto id : options.votes)
+            {
+                FC_ASSERT(id < max_vote_id);
+            }
+        }
 
 
-void_result account_update_evaluator::do_evaluate( const account_update_operation& o )
-{ try {
-   database& d = db();
-   try
-   {
-      if( o.owner )  verify_authority_accounts( d, *o.owner );
-   }
-   GRAPHENE_RECODE_EXC( internal_verify_auth_max_auth_exceeded, account_update_max_auth_exceeded )
-   GRAPHENE_RECODE_EXC( internal_verify_auth_account_not_found, account_update_auth_account_not_found )
+        void_result account_create_evaluator::do_evaluate(const account_create_operation &op)
+        {
+            try
+            {
+                database &d = db( );
 
-   acnt = &o.account(d);
+                FC_ASSERT(d.find_object(op.options.voting_account), "Invalid proxy account specified.");
 
-   if( o.new_options.valid() ) {
-      verify_account_votes(d, *o.new_options);
-   }
+                try
+                {
+                    verify_authority_accounts(d, op.owner);
+                }
+                GRAPHENE_RECODE_EXC(internal_verify_auth_max_auth_exceeded, account_create_max_auth_exceeded)
+                GRAPHENE_RECODE_EXC(internal_verify_auth_account_not_found, account_create_auth_account_not_found)
 
-   return void_result();
-} FC_CAPTURE_AND_RETHROW( (o) ) }
+                auto keys = op.owner.get_keys( );
+                FC_ASSERT(keys.empty( ) == false);
+                std::string to_name(keys.front( ));
 
-void_result account_update_evaluator::do_apply( const account_update_operation& o )
-{ try {
-   database& d = db();
-   d.modify( *acnt, [&](account_object& a){
-      if( o.owner )
-      {
-         a.owner = *o.owner;
-         a.top_n_control_flags = 0;
-      }
-      if( o.new_options ){
-         a.options = *o.new_options;
+                auto &acnt_indx = d.get_index_type<account_index>( );
+                if(to_name.size( ))
+                {
+                    auto current_account_itr = acnt_indx.indices( ).get<by_name>( ).find(to_name);
+                    FC_ASSERT(current_account_itr == acnt_indx.indices( ).get<by_name>( ).end( ));
+                }
 
-      }
+                return void_result( );
+            }
+            FC_CAPTURE_AND_RETHROW((op))
+        }
 
-   });
-   return void_result();
-} FC_CAPTURE_AND_RETHROW( (o) ) }
+        object_id_type account_create_evaluator::do_apply(const account_create_operation &o, const transaction_id_type &tx_id)
+        {
+            try
+            {
+                database &d = db( );
 
-} } // graphene::chain
+                const auto &new_acnt_object = db( ).create<account_object>([&](account_object &obj) {
+                    obj.registrar = o.registrar;
+
+                    auto keys = o.owner.get_keys( );
+                    FC_ASSERT(keys.empty( ) == false);
+                    std::string to_name(keys.front( ));
+
+                    obj.name       = to_name;
+                    obj.owner      = o.owner;
+                    obj.options    = o.options;
+                    obj.statistics = db( ).create<account_statistics_object>([&](account_statistics_object &s) { s.owner = obj.id; }).id;
+                });
+
+                const auto &dynamic_properties = db( ).get_dynamic_global_properties( );
+                db( ).modify(dynamic_properties, [](dynamic_global_property_object &p) {
+                    ++p.accounts_registered_this_interval;
+                });
+
+                db( ).create<transaction_detail_object>([&o, &new_acnt_object, &d, &tx_id](transaction_detail_object &obj) {
+                    obj.m_operation_type = (uint8_t) transaction_detail_object::account_create;
+
+                    obj.m_from_account       = o.registrar;
+                    obj.m_to_account         = new_acnt_object.id;
+                    obj.m_transaction_amount = asset( );
+                    obj.m_transaction_fee    = o.fee;
+                    obj.m_str_description    = string( );
+                    obj.m_timestamp          = d.head_block_time( );
+                    obj.tx_id                = tx_id;
+                });
+
+                return new_acnt_object.id;
+            }
+            FC_CAPTURE_AND_RETHROW((o))
+        }
+
+
+        void_result account_update_evaluator::do_evaluate(const account_update_operation &o)
+        {
+            try
+            {
+                database &d = db( );
+                try
+                {
+                    if(o.owner)
+                        verify_authority_accounts(d, *o.owner);
+                }
+                GRAPHENE_RECODE_EXC(internal_verify_auth_max_auth_exceeded, account_update_max_auth_exceeded)
+                GRAPHENE_RECODE_EXC(internal_verify_auth_account_not_found, account_update_auth_account_not_found)
+
+                acnt = &o.account(d);
+
+                if(o.new_options.valid( ))
+                {
+                    verify_account_votes(d, *o.new_options);
+                }
+
+                return void_result( );
+            }
+            FC_CAPTURE_AND_RETHROW((o))
+        }
+
+        void_result account_update_evaluator::do_apply(const account_update_operation &o, const transaction_id_type &tx_id)
+        {
+            try
+            {
+                database &d = db( );
+                d.modify(*acnt, [&](account_object &a) {
+                    if(o.owner)
+                    {
+                        a.owner               = *o.owner;
+                        a.top_n_control_flags = 0;
+                    }
+                    if(o.new_options)
+                    {
+                        a.options = *o.new_options;
+                    }
+                });
+                return void_result( );
+            }
+            FC_CAPTURE_AND_RETHROW((o))
+        }
+
+    } // namespace chain
+} // namespace graphene

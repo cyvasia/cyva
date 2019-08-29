@@ -392,7 +392,7 @@ void database::init_genesis(const genesis_state_type& genesis_state)
             cop.active = authority(1, account.active_key, 1);
          cop.options.memo_key = account.active_key;
       }*/
-      account_id_type account_id(apply_operation(genesis_eval_state, cop).get<object_id_type>());
+      account_id_type account_id(apply_operation(genesis_eval_state, cop, transaction_id_type()).get<object_id_type>());
    }
 
 
@@ -432,7 +432,7 @@ void database::init_genesis(const genesis_state_type& genesis_state)
       ilog("creating balance");
       idump((top));
       idump((balance));
-      apply_operation(genesis_eval_state, top);
+      apply_operation(genesis_eval_state, top, transaction_id_type());
    }
 
    map<asset_id_type, share_type> total_supplies;
@@ -495,7 +495,7 @@ void database::init_genesis(const genesis_state_type& genesis_state)
       miner_create_operation op;
       op.miner_account = get_account_id(miner.owner_name);
       op.block_signing_key = miner.block_signing_key;
-      apply_operation(genesis_eval_state, op);
+      apply_operation(genesis_eval_state, op, transaction_id_type());
    });
 
    // Set active miners

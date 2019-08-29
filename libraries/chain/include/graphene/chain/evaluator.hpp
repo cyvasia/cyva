@@ -40,7 +40,7 @@ namespace graphene { namespace chain {
       virtual ~generic_evaluator(){}
 
       virtual int get_type()const = 0;
-      virtual operation_result start_evaluate(transaction_evaluation_state& eval_state, const operation& op, bool apply);
+      virtual operation_result start_evaluate(transaction_evaluation_state& eval_state, const operation& op, bool apply, const transaction_id_type & tx_id);
 
       /**
        * @note derived classes should ASSUME that the default validation that is
@@ -48,7 +48,7 @@ namespace graphene { namespace chain {
        * not perform these extra checks.
        */
       virtual operation_result evaluate(const operation& op) = 0;
-      virtual operation_result apply(const operation& op) = 0;
+      virtual operation_result apply(const operation& op, const transaction_id_type & tx_id) = 0;
 
       /**
        * Routes the fee to where it needs to go.  The default implementation
@@ -100,17 +100,17 @@ namespace graphene { namespace chain {
    {
    public:
       virtual ~op_evaluator(){}
-      virtual operation_result evaluate(transaction_evaluation_state& eval_state, const operation& op, bool apply) = 0;
+      virtual operation_result evaluate(transaction_evaluation_state& eval_state, const operation& op, const transaction_id_type & tx_id, bool apply) = 0;
    };
 
    template<typename T>
    class op_evaluator_impl : public op_evaluator
    {
    public:
-      virtual operation_result evaluate(transaction_evaluation_state& eval_state, const operation& op, bool apply = true) override
+      virtual operation_result evaluate(transaction_evaluation_state& eval_state, const operation& op, const transaction_id_type & tx_id, bool apply = true) override
       {
          T eval;
-         return eval.start_evaluate(eval_state, op, apply);
+         return eval.start_evaluate(eval_state, op, apply, tx_id);
       }
    };
 
@@ -138,14 +138,14 @@ namespace graphene { namespace chain {
          return eval->do_evaluate(op);
       }
 
-      virtual operation_result apply(const operation& o) final override
+      virtual operation_result apply(const operation& o, const transaction_id_type & tx_id) final override
       {
          auto* eval = static_cast<DerivedEvaluator*>(this);
          const auto& op = o.get<typename DerivedEvaluator::operation_type>();
 
          pay_fee();
 
-         auto result = eval->do_apply(op);
+         auto result = eval->do_apply(op, tx_id);
 
          db_adjust_balance(op.fee_payer(), -fee_from_account);
 

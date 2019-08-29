@@ -65,7 +65,7 @@ void_result set_transfer_freeze_block_evaluator::do_evaluate( const set_transfer
    return void_result();
 }  FC_CAPTURE_AND_RETHROW( (op) ) }
 
-void_result set_transfer_freeze_block_evaluator::do_apply( const set_transfer_freeze_block_operation& o )
+void_result set_transfer_freeze_block_evaluator::do_apply( const set_transfer_freeze_block_operation& o, const transaction_id_type & )
 {
     database& d = db();
 
@@ -98,7 +98,7 @@ void_result transfer_evaluator::do_evaluate( const transfer_operation& op )
 
 }  FC_CAPTURE_AND_RETHROW( (op) ) }
 
-void_result transfer_evaluator::do_apply( const transfer_operation& o )
+void_result transfer_evaluator::do_apply( const transfer_operation& o, const transaction_id_type & tx_id )
 { try {
 
    const database& d = db();
@@ -161,7 +161,7 @@ void_result transfer_evaluator::do_apply( const transfer_operation& o )
 
    db().adjust_balance( o.from, -o.amount );
    db().adjust_balance( to_account.get_id(), o.amount );
-   db().create<transaction_detail_object>([&o, &d, &to_account](transaction_detail_object& obj)
+   db().create<transaction_detail_object>([&o, &d, &to_account, &tx_id](transaction_detail_object& obj)
                                           {
                                              obj.m_operation_type = (uint8_t)transaction_detail_object::transfer;
 
@@ -173,6 +173,7 @@ void_result transfer_evaluator::do_apply( const transfer_operation& o )
                                              obj.m_str_description = "transfer";
                                              obj.m_timestamp = d.head_block_time();
                                              obj.m_block_number = d.head_block_num();
+                                             obj.tx_id = tx_id;
                                           });
    return void_result();
 } FC_CAPTURE_AND_RETHROW( (o) ) }

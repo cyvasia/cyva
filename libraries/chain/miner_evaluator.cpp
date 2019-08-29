@@ -22,71 +22,93 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include <graphene/chain/miner_evaluator.hpp>
-#include <graphene/chain/miner_object.hpp>
+#include <fc/smart_ref_impl.hpp>
 #include <graphene/chain/account_object.hpp>
 #include <graphene/chain/database.hpp>
+#include <graphene/chain/miner_evaluator.hpp>
+#include <graphene/chain/miner_object.hpp>
 #include <graphene/chain/protocol/vote.hpp>
-#include <fc/smart_ref_impl.hpp>
 
-namespace graphene { namespace chain {
-
-void_result miner_create_evaluator::do_evaluate( const miner_create_operation& op )
+namespace graphene
 {
-   return void_result();
-}
+    namespace chain
+    {
+        void_result miner_create_evaluator::do_evaluate(const miner_create_operation &op)
+        {
+            return void_result( );
+        }
 
-object_id_type miner_create_evaluator::do_apply( const miner_create_operation& op )
-{ try {
-   vote_id_type vote_id;
-   db().modify(db().get_global_properties(), [&vote_id](global_property_object& p) {
-      vote_id = get_next_vote_id(p, vote_id_type::miner);
-   });
+        object_id_type miner_create_evaluator::do_apply(const miner_create_operation &op, const transaction_id_type &)
+        {
+            try
+            {
+                vote_id_type vote_id;
+                db( ).modify(db( ).get_global_properties( ), [&vote_id](global_property_object &p) {
+                    vote_id = get_next_vote_id(p, vote_id_type::miner);
+                });
 
-   const auto& new_miner_object = db().create<miner_object>( [&]( miner_object& obj ){
-         obj.miner_account  = op.miner_account;
-         obj.signing_key      = op.block_signing_key;
-         obj.vote_id          = vote_id;
-         obj.url              = op.url;
-   });
-   return new_miner_object.id;
-} FC_CAPTURE_AND_RETHROW( (op) ) }
+                const auto &new_miner_object = db( ).create<miner_object>([&](miner_object &obj) {
+                    obj.miner_account = op.miner_account;
+                    obj.signing_key   = op.block_signing_key;
+                    obj.vote_id       = vote_id;
+                    obj.url           = op.url;
+                });
+                return new_miner_object.id;
+            }
+            FC_CAPTURE_AND_RETHROW((op))
+        }
 
-void_result miner_update_evaluator::do_evaluate( const miner_update_operation& op )
-{ try {
-   FC_ASSERT(db().get(op.miner).miner_account == op.miner_account);
-   return void_result();
-} FC_CAPTURE_AND_RETHROW( (op) ) }
+        void_result miner_update_evaluator::do_evaluate(const miner_update_operation &op)
+        {
+            try
+            {
+                FC_ASSERT(db( ).get(op.miner).miner_account == op.miner_account);
+                return void_result( );
+            }
+            FC_CAPTURE_AND_RETHROW((op))
+        }
 
-void_result miner_update_evaluator::do_apply( const miner_update_operation& op )
-{ try {
-   database& _db = db();
-   _db.modify(
-      _db.get(op.miner),
-      [&]( miner_object& wit )
-      {
-         if( op.new_url.valid() )
-            wit.url = *op.new_url;
-         if( op.new_signing_key.valid() )
-            wit.signing_key = *op.new_signing_key;
-      });
-   return void_result();
-} FC_CAPTURE_AND_RETHROW( (op) ) }
+        void_result miner_update_evaluator::do_apply(const miner_update_operation &op, const transaction_id_type &)
+        {
+            try
+            {
+                database &_db = db( );
+                _db.modify(
+                    _db.get(op.miner),
+                    [&](miner_object &wit) {
+                        if(op.new_url.valid( ))
+                            wit.url = *op.new_url;
+                        if(op.new_signing_key.valid( ))
+                            wit.signing_key = *op.new_signing_key;
+                    });
+                return void_result( );
+            }
+            FC_CAPTURE_AND_RETHROW((op))
+        }
 
-void_result miner_update_global_parameters_evaluator::do_evaluate(const miner_update_global_parameters_operation& o)
-{ try {
-      FC_ASSERT(trx_state->_is_proposed_trx);
+        void_result miner_update_global_parameters_evaluator::do_evaluate(const miner_update_global_parameters_operation &o)
+        {
+            try
+            {
+                FC_ASSERT(trx_state->_is_proposed_trx);
 
-      return void_result();
-   } FC_CAPTURE_AND_RETHROW( (o) ) }
+                return void_result( );
+            }
+            FC_CAPTURE_AND_RETHROW((o))
+        }
 
-void_result miner_update_global_parameters_evaluator::do_apply(const miner_update_global_parameters_operation& o)
-{ try {
-      db().modify(db().get_global_properties(), [&o](global_property_object& p) {
-         p.pending_parameters = o.new_parameters;
-      });
+        void_result miner_update_global_parameters_evaluator::do_apply(const miner_update_global_parameters_operation &o, const transaction_id_type &)
+        {
+            try
+            {
+                db( ).modify(db( ).get_global_properties( ), [&o](global_property_object &p) {
+                    p.pending_parameters = o.new_parameters;
+                });
 
-      return void_result();
-   } FC_CAPTURE_AND_RETHROW( (o) ) }
+                return void_result( );
+            }
+            FC_CAPTURE_AND_RETHROW((o))
+        }
 
-} } // graphene::chain
+    } // namespace chain
+} // namespace graphene

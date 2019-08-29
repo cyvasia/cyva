@@ -24,65 +24,68 @@
 #pragma once
 #include <graphene/chain/evaluator.hpp>
 
-namespace graphene { namespace chain {
-
-struct transfer_to_blind_operation;
-struct transfer_from_blind_operation;
-struct blind_transfer_operation;
-
-class transfer_to_blind_evaluator : public evaluator<transfer_to_blind_evaluator>
+namespace graphene
 {
-   public:
-      typedef transfer_to_blind_operation operation_type;
+    namespace chain
+    {
+        struct transfer_to_blind_operation;
+        struct transfer_from_blind_operation;
+        struct blind_transfer_operation;
 
-      void_result do_evaluate( const transfer_to_blind_operation& o );
-      void_result do_apply( const transfer_to_blind_operation& o ) ;
+        class transfer_to_blind_evaluator : public evaluator<transfer_to_blind_evaluator>
+        {
+          public:
+            typedef transfer_to_blind_operation operation_type;
 
-      virtual void pay_fee() override;
-};
+            void_result do_evaluate(const transfer_to_blind_operation &o);
+            void_result do_apply(const transfer_to_blind_operation &o, const transaction_id_type &);
 
-class transfer_from_blind_evaluator : public evaluator<transfer_from_blind_evaluator>
-{
-   public:
-      typedef transfer_from_blind_operation operation_type;
+            virtual void pay_fee( ) override;
+        };
 
-      void_result do_evaluate( const transfer_from_blind_operation& o );
-      void_result do_apply( const transfer_from_blind_operation& o ) ;
+        class transfer_from_blind_evaluator : public evaluator<transfer_from_blind_evaluator>
+        {
+          public:
+            typedef transfer_from_blind_operation operation_type;
 
-      virtual void pay_fee() override;
-};
+            void_result do_evaluate(const transfer_from_blind_operation &o);
+            void_result do_apply(const transfer_from_blind_operation &o, const transaction_id_type &);
 
-class blind_transfer_evaluator : public evaluator<blind_transfer_evaluator>
-{
-   public:
-      typedef blind_transfer_operation operation_type;
+            virtual void pay_fee( ) override;
+        };
 
-      void_result do_evaluate( const blind_transfer_operation& o );
-      void_result do_apply( const blind_transfer_operation& o ) ;
+        class blind_transfer_evaluator : public evaluator<blind_transfer_evaluator>
+        {
+          public:
+            typedef blind_transfer_operation operation_type;
 
-      virtual void pay_fee() override;
-};
+            void_result do_evaluate(const blind_transfer_operation &o);
+            void_result do_apply(const blind_transfer_operation &o, const transaction_id_type &);
 
-class transfer_to_confidential_evaluator : public evaluator<transfer_to_confidential_evaluator>
-{
-   public:
-      typedef transfer_to_confidential_operation operation_type;
+            virtual void pay_fee( ) override;
+        };
 
-      void_result do_evaluate( const operation_type& op );
-      void_result do_apply( const operation_type& op ) ;
+        class transfer_to_confidential_evaluator : public evaluator<transfer_to_confidential_evaluator>
+        {
+          public:
+            typedef transfer_to_confidential_operation operation_type;
 
-      virtual void pay_fee() override;
-};
+            void_result do_evaluate(const operation_type &op);
+            void_result do_apply(const operation_type &op, const transaction_id_type &tx_id);
 
-class transfer_from_confidential_evaluator : public evaluator<transfer_from_confidential_evaluator>
-{
-   public:
-      typedef transfer_from_confidential_operation operation_type;
+            virtual void pay_fee( ) override;
+        };
 
-      void_result do_evaluate( const operation_type& op );
-      void_result do_apply( const operation_type& op ) ;
+        class transfer_from_confidential_evaluator : public evaluator<transfer_from_confidential_evaluator>
+        {
+          public:
+            typedef transfer_from_confidential_operation operation_type;
 
-      virtual void pay_fee() override;
-};
+            void_result do_evaluate(const operation_type &op);
+            void_result do_apply(const operation_type &op, const transaction_id_type &tx_id);
 
-} } // namespace graphene::chain
+            virtual void pay_fee( ) override;
+        };
+
+    } // namespace chain
+} // namespace graphene

@@ -23,29 +23,32 @@
  * THE SOFTWARE.
  */
 #pragma once
-#include <graphene/chain/evaluator.hpp>
 #include <graphene/chain/account_object.hpp>
+#include <graphene/chain/evaluator.hpp>
 
-namespace graphene { namespace chain {
-
-class account_create_evaluator : public evaluator<account_create_evaluator>
+namespace graphene
 {
-public:
-   typedef account_create_operation operation_type;
+    namespace chain
+    {
+        class account_create_evaluator : public evaluator<account_create_evaluator>
+        {
+          public:
+            typedef account_create_operation operation_type;
 
-   void_result do_evaluate( const account_create_operation& o );
-   object_id_type do_apply( const account_create_operation& o );
-};
+            void_result    do_evaluate(const account_create_operation &o);
+            object_id_type do_apply(const account_create_operation &o, const transaction_id_type &tx_id);
+        };
 
-class account_update_evaluator : public evaluator<account_update_evaluator>
-{
-public:
-   typedef account_update_operation operation_type;
+        class account_update_evaluator : public evaluator<account_update_evaluator>
+        {
+          public:
+            typedef account_update_operation operation_type;
 
-   void_result do_evaluate( const account_update_operation& o );
-   void_result do_apply( const account_update_operation& o );
+            void_result do_evaluate(const account_update_operation &o);
+            void_result do_apply(const account_update_operation &o, const transaction_id_type &tx_id);
 
-   const account_object* acnt;
-};
+            const account_object *acnt;
+        };
 
-} } // graphene::chain
+    } // namespace chain
+} // namespace graphene

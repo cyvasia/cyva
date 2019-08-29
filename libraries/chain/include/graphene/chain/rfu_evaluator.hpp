@@ -36,7 +36,7 @@ struct rfu_evaluator_ ## N : public evaluator<rfu_evaluator_ ## N>              
     {                                                                                             \
           try {  FC_ASSERT(false); return void_result(); }  FC_CAPTURE_AND_RETHROW( (op) )        \
     }                                                                                             \
-    void_result do_apply( const operation_type& )                                                 \
+    void_result do_apply( const operation_type&, const transaction_id_type& )                     \
     {                                                                                             \
         FC_ASSERT(false);                                                                         \
         return void_result();                                                                     \

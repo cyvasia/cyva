@@ -34,7 +34,7 @@ namespace graphene { namespace chain {
    public:
       typedef set_transfer_freeze_block_operation operation_type;
       void_result do_evaluate( const set_transfer_freeze_block_operation& o );
-      void_result do_apply( const set_transfer_freeze_block_operation& o );
+      void_result do_apply(const set_transfer_freeze_block_operation& o , const transaction_id_type &);
    };
 
    class transfer_evaluator : public evaluator<transfer_evaluator>
@@ -43,7 +43,7 @@ namespace graphene { namespace chain {
          typedef transfer_operation operation_type;
 
          void_result do_evaluate( const transfer_operation& o );
-         void_result do_apply( const transfer_operation& o );
+         void_result do_apply(const transfer_operation& o , const transaction_id_type &tx_id);
    };
 
 } } // graphene::chain

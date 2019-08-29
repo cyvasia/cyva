@@ -26,33 +26,36 @@
 #include <graphene/chain/evaluator.hpp>
 #include <graphene/chain/miner_object.hpp>
 
-namespace graphene { namespace chain {
+namespace graphene
+{
+    namespace chain
+    {
+        class miner_create_evaluator : public evaluator<miner_create_evaluator>
+        {
+          public:
+            typedef miner_create_operation operation_type;
 
-   class miner_create_evaluator : public evaluator<miner_create_evaluator>
-   {
-      public:
-         typedef miner_create_operation operation_type;
+            void_result    do_evaluate(const miner_create_operation &o);
+            object_id_type do_apply(const miner_create_operation &o, const transaction_id_type &);
+        };
 
-         void_result do_evaluate( const miner_create_operation& o );
-         object_id_type do_apply( const miner_create_operation& o );
-   };
+        class miner_update_evaluator : public evaluator<miner_update_evaluator>
+        {
+          public:
+            typedef miner_update_operation operation_type;
 
-   class miner_update_evaluator : public evaluator<miner_update_evaluator>
-   {
-      public:
-         typedef miner_update_operation operation_type;
+            void_result do_evaluate(const miner_update_operation &o);
+            void_result do_apply(const miner_update_operation &o, const transaction_id_type &);
+        };
 
-         void_result do_evaluate( const miner_update_operation& o );
-         void_result do_apply( const miner_update_operation& o );
-   };
+        class miner_update_global_parameters_evaluator : public evaluator<miner_update_global_parameters_evaluator>
+        {
+          public:
+            typedef miner_update_global_parameters_operation operation_type;
 
-   class miner_update_global_parameters_evaluator : public evaluator<miner_update_global_parameters_evaluator>
-   {
-   public:
-      typedef miner_update_global_parameters_operation operation_type;
+            void_result do_evaluate(const miner_update_global_parameters_operation &o);
+            void_result do_apply(const miner_update_global_parameters_operation &o, const transaction_id_type &);
+        };
 
-      void_result do_evaluate( const miner_update_global_parameters_operation& o );
-      void_result do_apply( const miner_update_global_parameters_operation& o );
-   };
-
-} } // graphene::chain
+    } // namespace chain
+} // namespace graphene
