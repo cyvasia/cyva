@@ -103,6 +103,7 @@ namespace graphene { namespace app {
       optional<signed_block> get_head_block()const;
       optional<signed_block> get_nearest_block(const string& time_iso_str) const;
       miner_reward_input get_time_to_maint_by_block_time(fc::time_point_sec block_time) const;
+      map<string, transaction_detail_object> get_transactions_by_id(vector<string> ids) const;
       
       // Globals
       chain_property_object get_chain_properties()const;
@@ -404,31 +405,39 @@ namespace graphene { namespace app {
       }
    }
 
-   map<string, signed_transaction> database_api::get_transactions_by_id(vector<string> ids) const
+   map<string, transaction_detail_object> database_api::get_transactions_by_id(vector<string> ids) const
    {
-       set<transaction_id_type>        id_set;
-       map<string, signed_transaction> result;
+       return my->get_transactions_by_id(ids);
+   }
+
+   map<string, transaction_detail_object> database_api_impl::get_transactions_by_id(vector<string> ids) const
+   {
+       map<string, transaction_detail_object> result;
+
+       const auto &idx = _db.get_index_type<transaction_detail_index>( ).indices( ).get<by_txid>( );
+       const auto &idx_2 = _db.get_index_type<transaction_detail_index>( ).indices( ).get<by_id>( );
+
        for(auto &&id : ids)
-           id_set.insert(transaction_id_type(id));
-
-       auto hbn = get_head_block( )->block_num( );
-       for(size_t i = 0; i < hbn; ++i)
        {
-           auto blk = get_block(i);
-           if(blk)
-               for(auto &&tx : blk->transactions)
+           try
+           {
+               if(id.length() < 12 )
                {
-                   if(id_set.empty( ))
-                       return result;
-
-                   auto it = id_set.find(tx.id( ));
-                   if(id_set.end( ) != it)
-                   {
-                       result[string(tx.id( ))] = signed_transaction(tx);
-                       id_set.erase(it);
-                   }
+                   auto tx = object_id_type(id);
+                   auto it = idx_2.find(tx);
+                   if(it != idx_2.end( ))
+                       result[id] = *it;
                }
+               else
+               {
+                   auto tx = transaction_id_type(id);
+                   auto it = idx.find(tx);
+                   if(it != idx.end( ))
+                       result[id] = *it;
+               }
+           } catch (...) {  }
        }
+
        return result;
    }
 

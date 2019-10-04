@@ -231,7 +231,7 @@ namespace graphene { namespace app {
           * @ingroup DatabaseAPI
           */
          optional<signed_transaction> get_recent_transaction_by_id( const transaction_id_type& id )const;
-         map<string, signed_transaction> get_transactions_by_id(vector<string> ids )const;
+         map<string, transaction_detail_object> get_transactions_by_id(vector<string> ids )const;
 
          /////////////
          // Globals //
